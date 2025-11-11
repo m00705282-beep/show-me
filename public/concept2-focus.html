@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONCEPT 2: Focus Mode</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, sans-serif; 
+      background: #0a0e1a; 
+      color: #e0e6ed;
+    }
+    .layout { 
+      display: grid; 
+      grid-template-columns: 250px 1fr; 
+      grid-template-rows: 60px 1fr; 
+      height: 100vh;
+      gap: 1px;
+      background: #1a1f35;
+    }
+    .header { 
+      grid-column: 1 / -1; 
+      background: #0f1419; 
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2d3748;
+    }
+    .stat-box {
+      text-align: center;
+      padding: 5px 15px;
+    }
+    .stat-label { 
+      font-size: 10px; 
+      text-transform: uppercase; 
+      color: #64748b;
+      letter-spacing: 1px;
+    }
+    .stat-value { 
+      font-size: 24px; 
+      font-weight: 700; 
+      color: #10b981;
+    }
+    .sidebar { 
+      background: #0f1419; 
+      padding: 15px;
+      overflow-y: auto;
+      border-right: 1px solid #2d3748;
+    }
+    .sidebar-section { 
+      margin-bottom: 25px;
+    }
+    .sidebar-title { 
+      font-size: 11px; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      color: #64748b;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .exchange-mini {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      background: #1a1f35;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .exchange-name { font-weight: 600; }
+    .exchange-bal { color: #10b981; font-weight: 700; }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #1a1f35;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+    .toggle {
+      width: 36px;
+      height: 18px;
+      background: #374151;
+      border-radius: 18px;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle.on { background: #10b981; }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle.on::after { left: 20px; }
+    .main { 
+      background: #0f1419; 
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .main-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+    .opp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .opp-table thead {
+      background: #1a1f35;
+      position: sticky;
+      top: 0;
+    }
+    .opp-table th {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #2d3748;
+    }
+    .opp-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #1a1f35;
+    }
+    .opp-table tbody tr:hover {
+      background: #1a1f35;
+    }
+    .coin { 
+      font-weight: 700; 
+      color: #60a5fa;
+    }
+    .spread { 
+      font-weight: 700; 
+      color: #10b981;
+    }
+    .profit { 
+      font-weight: 700; 
+      color: #10b981;
+    }
+    .btn {
+      padding: 6px 12px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .btn:hover { background: #2563eb; }
+    .btn-small { padding: 4px 8px; font-size: 10px; }
+    .btn-neutral { background: #6b7280; }
+    .btn-block { width: 100%; }
+    .btn-spaced { margin-bottom: 8px; }
+
+    .header-title { font-size: 16px; font-weight: 700; }
+    .header-stats { display: flex; gap: 30px; }
+    .stat-value-positive { color: #10b981; }
+    .stat-value-warning { color: #f59e0b; }
+
+    .main-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .filter-group { display: flex; gap: 10px; }
+    .input-control { padding: 6px 10px; background: #1a1f35; border: 1px solid #2d3748; border-radius: 4px; color: #e0e6ed; font-size: 12px; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0e1a; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="header">
+      <h1 class="header-title">⚡ ARBITRAGE TERMINAL</h1>
+      <div class="header-stats">
+        <div class="stat-box">
+          <div class="stat-label">Balance</div>
+          <div class="stat-value">$12,847</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Today P/L</div>
+          <div class="stat-value stat-value-positive">+$342</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value">87%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Live Opps</div>
+          <div class="stat-value stat-value-warning">47</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">💰 Balances</div>
+        <div class="exchange-mini">
+          <span class="exchange-name">Binance</span>
+          <span class="exchange-bal">$3,200</span>
+        </div>
+        <div class="exchange-mini">
+          <span class="exchange-name">KuCoin</span>
+          <span class="exchange-bal">$2,847</span>
+        </div>
+        <div class="exchange-mini">
+          <span class="exchange-name">Gate.io</span>
+          <span class="exchange-bal">$2,100</span>
+        </div>
+        <div class="exchange-mini">
+          <span class="exchange-name">OKX</span>
+          <span class="exchange-bal">$1,920</span>
+        </div>
+        <div class="exchange-mini">
+          <span class="exchange-name">Bybit</span>
+          <span class="exchange-bal">$1,780</span>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">⚙️ Features</div>
+        <div class="toggle-row">
+          <span>Position Sizing</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Multi-Trade</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Fee Optimizer</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Flash Detector</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <span>AI Balance</span>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Auto Transfer</span>
+          <div class="toggle"></div>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">🎯 Quick Actions</div>
+        <button class="btn btn-block btn-spaced">Emergency Stop</button>
+        <button class="btn btn-block btn-spaced">Rebalance Funds</button>
+        <button class="btn btn-block">Export Logs</button>
+      </div>
+    </div>
+    
+    <div class="main">
+      <div class="main-toolbar">
+        <div class="main-title">🚀 LIVE OPPORTUNITIES (Auto-updating)</div>
+        <div class="filter-group">
+          <input type="text" placeholder="Filter coin..." class="input-control">
+          <label for="spreadFilter" class="visually-hidden">Minimum spread filter</label>
+          <select id="spreadFilter" class="input-control" aria-label="Minimum spread filter">
+            <option>Min Spread: 0%</option>
+            <option>Min Spread: 0.5%</option>
+            <option>Min Spread: 1%</option>
+            <option>Min Spread: 2%</option>
+          </select>
+        </div>
+      </div>
+      
+      <table class="opp-table">
+        <thead>
+          <tr>
+            <th>COIN</th>
+            <th>BUY EXCHANGE</th>
+            <th>BUY PRICE</th>
+            <th>SELL EXCHANGE</th>
+            <th>SELL PRICE</th>
+            <th>SPREAD</th>
+            <th>FEE</th>
+            <th>NET SPREAD</th>
+            <th>PROFIT</th>
+            <th>SIZE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="coin">BTC</span></td>
+            <td>Binance</td>
+            <td>$43,210.50</td>
+            <td>KuCoin</td>
+            <td>$43,820.30</td>
+            <td><span class="spread">2.34%</span></td>
+            <td>0.42%</td>
+            <td><span class="spread">1.92%</span></td>
+            <td><span class="profit">$47.20</span></td>
+            <td>$2,500</td>
+            <td><button class="btn btn-small">EXECUTE</button></td>
+          </tr>
+          <tr>
+            <td><span class="coin">ETH</span></td>
+            <td>Gate.io</td>
+            <td>$2,284.30</td>
+            <td>OKX</td>
+            <td>$2,327.00</td>
+            <td><span class="spread">1.87%</span></td>
+            <td>0.40%</td>
+            <td><span class="spread">1.47%</span></td>
+            <td><span class="profit">$28.50</span></td>
+            <td>$2,000</td>
+            <td><button class="btn btn-small">EXECUTE</button></td>
+          </tr>
+          <tr>
+            <td><span class="coin">XRP</span></td>
+            <td>Bybit</td>
+            <td>$0.5845</td>
+            <td>Binance</td>
+            <td>$0.5935</td>
+            <td><span class="spread">1.54%</span></td>
+            <td>0.38%</td>
+            <td><span class="spread">1.16%</span></td>
+            <td><span class="profit">$18.30</span></td>
+            <td>$1,600</td>
+            <td><button class="btn btn-small">EXECUTE</button></td>
+          </tr>
+          <tr>
+            <td><span class="coin">ADA</span></td>
+            <td>KuCoin</td>
+            <td>$0.3720</td>
+            <td>Bitget</td>
+            <td>$0.3773</td>
+            <td><span class="spread">1.42%</span></td>
+            <td>0.45%</td>
+            <td>0.97%</td>
+            <td>$14.20</td>
+            <td>$1,500</td>
+            <td><button class="btn btn-small btn-neutral">WAIT</button></td>
+          </tr>
+          <tr>
+            <td><span class="coin">SOL</span></td>
+            <td>OKX</td>
+            <td>$98.45</td>
+            <td>Gate.io</td>
+            <td>$99.71</td>
+            <td><span class="spread">1.28%</span></td>
+            <td>0.41%</td>
+            <td>0.87%</td>
+            <td>$12.80</td>
+            <td>$1,500</td>
+            <td><button class="btn btn-small btn-neutral">WAIT</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
