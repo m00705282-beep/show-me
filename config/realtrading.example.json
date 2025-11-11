@@ -1,0 +1,71 @@
+{
+  "comment": "Real Trading Configuration - COPY to realtrading.json and configure",
+  "warning": "⚠️ THIS USES REAL MONEY! Test with small amounts first!",
+  
+  "enabled": false,
+  "dryRun": true,
+  
+  "safetyCaps": {
+    "maxTradeSize": 100,
+    "maxDailyVolume": 500,
+    "maxOpenPositions": 3,
+    "minSpreadRequired": 1.5,
+    "maxConsecutiveLosses": 3,
+    "maxDailyLoss": 100
+  },
+  
+  "approval": {
+    "requireApproval": true,
+    "autoApproveUnder": 20
+  },
+  
+  "exchanges": {
+    "binance": {
+      "enabled": false,
+      "apiKey": "YOUR_BINANCE_API_KEY",
+      "secret": "YOUR_BINANCE_SECRET",
+      "instructions": {
+        "step1": "Create API key at https://www.binance.com/en/my/settings/api-management",
+        "step2": "Enable 'Spot & Margin Trading' permission",
+        "step3": "Restrict to your IP address for security",
+        "step4": "NEVER share your secret key!"
+      }
+    },
+    "kraken": {
+      "enabled": false,
+      "apiKey": "YOUR_KRAKEN_API_KEY",
+      "secret": "YOUR_KRAKEN_SECRET",
+      "instructions": {
+        "step1": "Create API key at https://www.kraken.com/u/security/api",
+        "step2": "Enable 'Query Funds' and 'Create & Modify Orders'",
+        "step3": "Set withdrawal limit to 0",
+        "step4": "Use 2FA for additional security"
+      }
+    },
+    "coinbase": {
+      "enabled": false,
+      "apiKey": "YOUR_COINBASE_API_KEY",
+      "secret": "YOUR_COINBASE_SECRET",
+      "instructions": {
+        "step1": "Create API key at https://www.coinbase.com/settings/api",
+        "step2": "Enable 'Trade' permission only",
+        "step3": "Do NOT enable 'Transfer' permission",
+        "step4": "Save your secret key securely"
+      }
+    }
+  },
+  
+  "notifications": {
+    "onTrade": true,
+    "onApprovalRequired": true,
+    "onEmergencyStop": true,
+    "onDailyLimitReached": true
+  },
+  
+  "testing": {
+    "testMode": {
+      "description": "Start with dry-run mode and small amounts",
+      "recommendation": "Set maxTradeSize to $10-20 for initial testing"
+    }
+  }
+}
