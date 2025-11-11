@@ -1,0 +1,58 @@
+name: Test & Coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run coverage tests
+        run: npm run test:coverage
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          retention-days: 7
+          path: coverage
+
+      - name: Publish coverage summary
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'fs';
+
+          const summaryPath = 'coverage/coverage-summary.json';
+          try {
+            const { total } = JSON.parse(readFileSync(summaryPath, 'utf8'));
+            const fmt = (value) => (value ?? 'n/a');
+            const report = `## Coverage Summary\n\n- Statements: ${fmt(total.statements?.pct)}%\n- Branches: ${fmt(total.branches?.pct)}%\n- Functions: ${fmt(total.functions?.pct)}%\n- Lines: ${fmt(total.lines?.pct)}%\n`;
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${report}\n`);
+          } catch (error) {
+            appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              `## Coverage Summary\n\nFailed to read coverage summary: ${error.message}\n`
+            );
+          }
+          NODE
