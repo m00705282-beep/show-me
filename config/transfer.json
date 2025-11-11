@@ -1,0 +1,13 @@
+{
+  "whitelistedExchanges": [
+    "binance",
+    "kraken",
+    "coinbase",
+    "kucoin"
+  ],
+  "preferredNetwork": "TRC20",
+  "enabled": false,
+  "maxTransferAmount": 200,
+  "dryRun": true,
+  "maxDailyTransferVolume": 500
+}
