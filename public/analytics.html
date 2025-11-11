@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Analytics Dashboard | Crypto Arbitrage</title>
+  <style>
+    :root{
+      --bg:#0a0e14; --card:#131821; --border:#1d2433; --text:#e6eef6;
+      --green:#19c37d; --red:#ff6b6b; --blue:#4f7cff; --yellow:#ffd166;
+      --muted:#6b7a8f;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:linear-gradient(135deg,#0a0e14,#151b24);
+      color:var(--text);
+      min-height:100vh;
+      padding:20px;
+    }
+    
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:24px;
+      padding:16px 20px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    .header h1{font-size:24px;font-weight:700}
+    
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      margin-bottom:20px;
+    }
+    .card-header{
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      font-weight:600;
+      font-size:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .card-body{padding:18px}
+    
+    /* Opportunities Table */
+    .table-wrap{
+      max-height:500px;
+      overflow-y:auto;
+      border:1px solid var(--border);
+      border-radius:8px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    thead th{
+      position:sticky;
+      top:0;
+      background:var(--card);
+      padding:12px 10px;
+      text-align:left;
+      border-bottom:1px solid var(--border);
+      font-weight:600;
+      color:var(--blue);
+      z-index:10;
+    }
+    tbody td{
+      padding:12px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    tbody tr:hover{background:rgba(79,124,255,0.05)}
+    
+    .coin{font-weight:700;color:var(--text)}
+    .spread{
+      font-weight:700;
+      color:var(--green);
+      font-size:14px;
+    }
+    .spread.high{color:#00ff88}
+    .exchange{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
+    
+    /* Stats Grid */
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+    }
+    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    .stat-box{
+      padding:16px;
+      background:linear-gradient(135deg,rgba(79,124,255,0.08),rgba(25,195,125,0.05));
+      border:1px solid var(--border);
+      border-radius:8px;
+      text-align:center;
+    }
+    .stat-label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .stat-value{
+      font-size:24px;
+      font-weight:700;
+    }
+    .stat-value.green{color:var(--green)}
+    .stat-value.blue{color:var(--blue)}
+    .stat-value.yellow{color:var(--yellow)}
+    
+    /* Filter Bar */
+    .filters{
+      display:flex;
+      gap:10px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+    .filter-input{
+      padding:8px 12px;
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:6px;
+      color:var(--text);
+      font-size:13px;
+      outline:none;
+    }
+    .filter-input:focus{border-color:var(--blue)}
+    
+    /* Nav */
+    .nav{
+      display:flex;
+      gap:8px;
+      margin-top:16px;
+    }
+    .nav a{
+      padding:10px 20px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:8px;
+      color:var(--text);
+      text-decoration:none;
+      font-size:13px;
+      font-weight:600;
+      transition:all 0.2s;
+    }
+    .nav a:hover{border-color:var(--blue);color:var(--blue)}
+    .nav a.active{background:var(--blue);border-color:var(--blue);color:white}
+    
+    .loading{
+      text-align:center;
+      padding:40px;
+      color:var(--muted);
+    }
+    
+    .header-time{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .refresh-button{
+      padding:4px 10px;
+      background:var(--blue);
+      color:white;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:11px;
+      transition:background 0.2s ease;
+    }
+
+    .refresh-button:hover{
+      background:#1fb7ff;
+    }
+
+    .filter-input--wide{
+      flex:1;
+      min-width:200px;
+    }
+
+    .price-subtext{
+      display:block;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .volume-muted{
+      color:var(--muted);
+    }
+
+    .score-muted{
+      color:var(--muted);
+    }
+
+    .score-high{
+      color:var(--green);
+    }
+
+    .visually-hidden{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 Analytics Dashboard</h1>
+    <div class="header-time" id="updateTime">Loading...</div>
+  </div>
+  
+  <!-- Performance Stats -->
+  <div class="card">
+    <div class="card-header">
+      <span>🎯 Performance Metrics</span>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Opportunities Found</div>
+          <div class="stat-value blue" id="oppCount">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Avg Spread</div>
+          <div class="stat-value green" id="avgSpread">0.0%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Best Spread</div>
+          <div class="stat-value yellow" id="bestSpread">0.0%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Scan Speed</div>
+          <div class="stat-value" id="scanSpeed">0ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Opportunities List -->
+  <div class="card">
+    <div class="card-header">
+      <span>⚡ Live Opportunities</span>
+      <button class="refresh-button" onclick="refreshOpportunities()">🔄 Refresh</button>
+    </div>
+    <div class="card-body">
+      <div class="filters">
+        <input type="text" class="filter-input filter-input--wide" placeholder="Filter by coin..." id="coinFilter">
+        <label for="spreadFilter" class="visually-hidden">Minimum spread filter</label>
+        <select class="filter-input" id="spreadFilter" aria-label="Minimum spread filter">
+          <option value="0">Min Spread: All</option>
+          <option value="0.5">Min Spread: 0.5%</option>
+          <option value="1">Min Spread: 1%</option>
+          <option value="2" selected>Min Spread: 2%</option>
+          <option value="3">Min Spread: 3%</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Coin</th>
+              <th>Buy From</th>
+              <th>Sell To</th>
+              <th>Gross Spread</th>
+              <th>Net Spread</th>
+              <th>Volume</th>
+              <th>Quality</th>
+            </tr>
+          </thead>
+          <tbody id="opportunitiesTable">
+            <tr><td colspan="7" class="loading">Loading opportunities...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Navigation -->
+  <div class="nav">
+    <a href="/trading.html">💰 Trading</a>
+    <a href="/analytics.html" class="active">📊 Analytics</a>
+    <a href="/index.html">🔍 Opportunities</a>
+  </div>
+  
+  <script>
+    let opportunities = [];
+    
+    async function refreshOpportunities() {
+      try {
+        const res = await fetch('/api/snapshot');
+        const data = await res.json();
+        
+        opportunities = data.opportunities || [];
+        
+        // Update stats
+        document.getElementById('oppCount').textContent = opportunities.length;
+        
+        if (opportunities.length > 0) {
+          const spreads = opportunities.map(o => o.netSpread || 0);
+          const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
+          const bestSpread = Math.max(...spreads);
+          
+          document.getElementById('avgSpread').textContent = avgSpread.toFixed(2) + '%';
+          document.getElementById('bestSpread').textContent = bestSpread.toFixed(2) + '%';
+        }
+        
+        document.getElementById('scanSpeed').textContent = (data.fetchDuration || 0) + 'ms';
+        document.getElementById('updateTime').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        
+        renderOpportunities();
+      } catch (err) {
+        console.error('Failed to load opportunities:', err);
+      }
+    }
+    
+    function renderOpportunities() {
+      const minSpread = parseFloat(document.getElementById('spreadFilter').value);
+      const coinFilter = document.getElementById('coinFilter').value.toLowerCase();
+      
+      const filtered = opportunities.filter(o => {
+        const matchesCoin = !coinFilter || o.coin.toLowerCase().includes(coinFilter);
+        const matchesSpread = (o.netSpread || 0) >= minSpread;
+        return matchesCoin && matchesSpread;
+      });
+      
+      const tbody = document.getElementById('opportunitiesTable');
+      
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading">No opportunities found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = filtered
+        .sort((a, b) => (b.netSpread || 0) - (a.netSpread || 0))
+        .slice(0, 50)
+        .map(opp => {
+          const scoreClass = (opp.score || 0) >= 70 ? 'score-high' : 'score-muted';
+          return `
+            <tr>
+              <td><span class="coin">${opp.coin}</span></td>
+              <td><span class="exchange">${opp.buyM || opp.buyExchange || 'N/A'}</span><span class="price-subtext">$${(opp.buyP || 0).toFixed(4)}</span></td>
+              <td><span class="exchange">${opp.sellM || opp.sellExchange || 'N/A'}</span><span class="price-subtext">$${(opp.sellP || 0).toFixed(4)}</span></td>
+              <td><span class="spread ${(opp.grossSpread || 0) > 3 ? 'high' : ''}">${(opp.grossSpread || 0).toFixed(2)}%</span></td>
+              <td><span class="spread ${(opp.netSpread || 0) > 2 ? 'high' : ''}">${(opp.netSpread || 0).toFixed(2)}%</span></td>
+              <td><span class="volume-muted">$${(opp.buyVol24 || 0).toFixed(0)}</span></td>
+              <td><span class="${scoreClass}">${(opp.score || 0).toFixed(0)}</span></td>
+            </tr>
+          `;
+        }).join('');
+    }
+    
+    // Event listeners
+    document.getElementById('coinFilter').addEventListener('input', renderOpportunities);
+    document.getElementById('spreadFilter').addEventListener('change', renderOpportunities);
+    
+    // Auto-refresh every 15 seconds
+    setInterval(refreshOpportunities, 15000);
+    
+    // Initial load
+    refreshOpportunities();
+  </script>
+</body>
+</html>
