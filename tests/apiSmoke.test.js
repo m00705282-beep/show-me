@@ -6,30 +6,61 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-function waitForServerOutput(proc, regex, timeoutMs = 5000) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('Timeout waiting for server output'));
-    }, timeoutMs);
+const SERVER_READY_PATH = '/api/snapshot';
 
-    const onData = chunk => {
-      const text = chunk.toString();
-      if (regex.test(text)) {
-        cleanup();
-        resolve();
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function waitForServerReady(agent, path = SERVER_READY_PATH, timeoutMs = 15000, intervalMs = 500) {
+  const deadline = Date.now() + timeoutMs;
+  let lastError;
+
+  while (Date.now() < deadline) {
+    try {
+      const response = await agent.get(path).timeout({ deadline: intervalMs });
+      if (response.status >= 200 && response.status < 500) {
+        return;
       }
-    };
+    } catch (err) {
+      lastError = err;
+    }
+    await delay(intervalMs);
+  }
 
-    const cleanup = () => {
-      clearTimeout(timeout);
-      proc.stdout.off('data', onData);
-      proc.stderr.off('data', onData);
-    };
+  const reason = lastError?.message ? `: ${lastError.message}` : '';
+  throw new Error(`Timeout waiting for server readiness${reason}`);
+}
 
-    proc.stdout.on('data', onData);
-    proc.stderr.on('data', onData);
+async function stopServer(proc, timeoutMs = 10000) {
+  if (!proc) {
+    return;
+  }
+
+  let forced = false;
+  const closePromise = once(proc, 'close').catch(err => {
+    console.warn('[test] server close event error:', err.message);
   });
+
+  if (!proc.killed) {
+    proc.kill();
+  }
+
+  const forceTimer = setTimeout(() => {
+    if (!proc.killed) {
+      forced = true;
+      try {
+        proc.kill('SIGKILL');
+      } catch (err) {
+        console.warn('[test] force kill warning:', err.message);
+      }
+    }
+  }, timeoutMs);
+
+  await closePromise;
+
+  clearTimeout(forceTimer);
+  if (forced) {
+    console.warn('[test] server was force killed after timeout');
+  }
 }
 
 function startServer() {
@@ -55,22 +86,16 @@ describe('API smoke tests', () => {
   let request;
 
   before(async function () {
-    this.timeout(15000);
+    this.timeout(20000);
     serverProc = startServer();
-    await waitForServerOutput(serverProc, /\[api] listening/);
     request = supertest('http://localhost:8080');
+    await waitForServerReady(request);
   });
 
   after(async function () {
     this.timeout(10000);
-    if (serverProc) {
-      serverProc.kill();
-      try {
-        await once(serverProc, 'close');
-      } catch (err) {
-        console.warn('[test] server shutdown warning:', err.message);
-      }
-    }
+    await stopServer(serverProc);
+    serverProc = null;
   });
 
   it('GET /api/snapshot returns snapshot data', async () => {
