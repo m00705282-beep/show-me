@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔴 LIVE Monitor - Crypto Arbitrage Bot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .header {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-bottom: 2px solid #00ff88;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pulse {
+      width: 12px;
+      height: 12px;
+      background: #ff0000;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.1); }
+    }
+
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.05);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #00ff88;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .stat-card {
+      background: rgba(0, 255, 136, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ff88;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 5px;
+    }
+
+    /* Live Feed */
+    .live-feed {
+      height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      padding: 8px 12px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid transparent;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-entry.info { border-left-color: #00bfff; }
+    .log-entry.success { border-left-color: #00ff88; }
+    .log-entry.warning { border-left-color: #ffaa00; }
+    .log-entry.error { border-left-color: #ff0066; }
+
+    .timestamp {
+      color: #888;
+      margin-right: 10px;
+    }
+
+    /* Opportunities Table */
+    .opp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .opp-table th {
+      background: rgba(0, 255, 136, 0.2);
+      padding: 10px;
+      text-align: left;
+      border-bottom: 2px solid #00ff88;
+    }
+
+    .opp-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .opp-table tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .spread-high { color: #00ff88; font-weight: bold; }
+    .spread-med { color: #ffaa00; }
+    .spread-low { color: #ff6666; }
+
+    /* Activity Timeline */
+    .activity-item {
+      display: flex;
+      gap: 15px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border-left: 3px solid #00ff88;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: #888;
+      min-width: 60px;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    .activity-desc {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 136, 0.5);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 136, 0.7);
+    }
+
+    .refresh-info {
+      font-size: 12px;
+      color: #888;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    /* Nav */
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(0, 255, 136, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .table-scroll {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>🔴 LIVE Monitor</h1>
+      <div class="live-indicator">
+        <div class="pulse"></div>
+        <span>Real-time monitoring active</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/trading.html">💰 Trading</a>
+      <a href="/analytics.html">📊 Analytics</a>
+      <a href="/monitor.html">🔴 Monitor</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Stats Overview -->
+    <div class="panel full-width">
+      <div class="panel-title">📊 Live Statistics</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalOpp">0</div>
+          <div class="stat-label">Opportunities Found</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="qualityOpp">0</div>
+          <div class="stat-label">Quality Opportunities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="bestSpread">0%</div>
+          <div class="stat-label">Best Spread</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="botStatus">⏳</div>
+          <div class="stat-label">Bot Status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div class="panel">
+      <div class="actions-row">
+        <button class="refresh">🔄 Refresh Data</button>
+        <button class="refresh">📥 Export Snapshot</button>
+      </div>
+      <div class="panel-title">📡 Live Activity Feed</div>
+      <div class="live-feed" id="liveFeed"></div>
+      <div class="refresh-info">Auto-refresh: 2s</div>
+    </div>
+
+    <!-- Current Opportunities -->
+    <div class="panel">
+      <div class="panel-title">🎯 Current Opportunities</div>
+      <div class="table-scroll">
+        <table class="opp-table">
+          <thead>
+            <tr>
+              <th>Coin</th>
+              <th>Route</th>
+              <th>Spread</th>
+              <th>Quality</th>
+            </tr>
+          </thead>
+          <tbody id="oppTable"></tbody>
+        </table>
+      </div>
+      <div class="refresh-info">Auto-refresh: 5s</div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="panel full-width">
+      <div class="panel-title">⚡ Recent Activity</div>
+      <div id="activityTimeline"></div>
+      <div class="refresh-info">Last 10 actions</div>
+    </div>
+  </div>
+
+  <script>
+    let logs = [];
+    let activities = [];
+    const MAX_LOGS = 50;
+    const MAX_ACTIVITIES = 10;
+
+    // Fetch live data
+    async function fetchLiveData() {
+      try {
+        // Get snapshot
+        const snap = await fetch('/api/snapshot').then(r => r.json());
+        
+        // Update stats
+        document.getElementById('totalOpp').textContent = snap.opportunities?.length || 0;
+        
+        const qualityOpps = snap.opportunities?.filter(o => o.qualityScore >= 60) || [];
+        document.getElementById('qualityOpp').textContent = qualityOpps.length;
+        
+        const bestOpp = snap.opportunities?.[0];
+        if (bestOpp) {
+          document.getElementById('bestSpread').textContent = bestOpp.netSpread.toFixed(2) + '%';
+        }
+        
+        document.getElementById('botStatus').textContent = '✅';
+
+        // Update opportunities table
+        updateOpportunitiesTable(qualityOpps.slice(0, 10));
+
+        // Add log entry
+        addLog('info', `Scanned ${snap.opportunities?.length || 0} opportunities, ${qualityOpps.length} quality`);
+
+        // Track activity
+        if (qualityOpps.length > 0) {
+          const top = qualityOpps[0];
+          addActivity(
+            'Opportunity Detected',
+            `${top.coin}: ${top.buyM} → ${top.sellM} | ${top.netSpread.toFixed(2)}% spread`
+          );
+        }
+
+      } catch (err) {
+        document.getElementById('botStatus').textContent = '❌';
+        addLog('error', 'Failed to fetch data: ' + err.message);
+      }
+    }
+
+    // Fetch trading status
+    async function fetchTradingStatus() {
+      try {
+        const status = await fetch('/api/realtrading/status').then(r => r.json());
+        
+        if (status.enabled) {
+          addLog('success', `Trading: ${status.dryRun ? 'DRY-RUN' : 'LIVE'} | Balance: $${status.totalAvailableUSD.toFixed(2)}`);
+          
+          if (status.dailyProfit !== 0) {
+            addActivity(
+              'Profit Update',
+              `Daily profit: $${status.dailyProfit.toFixed(2)}`
+            );
+          }
+        }
+      } catch (err) {
+        addLog('warning', 'Trading status unavailable');
+      }
+    }
+
+    // Add log entry
+    function addLog(type, message) {
+      const timestamp = new Date().toLocaleTimeString();
+      logs.unshift({ type, message, timestamp });
+      
+      if (logs.length > MAX_LOGS) logs = logs.slice(0, MAX_LOGS);
+      
+      renderLogs();
+    }
+
+    // Render logs
+    function renderLogs() {
+      const feed = document.getElementById('liveFeed');
+      feed.innerHTML = logs.map(log => `
+        <div class="log-entry ${log.type}">
+          <span class="timestamp">${log.timestamp}</span>
+          ${log.message}
+        </div>
+      `).join('');
+    }
+
+    // Add activity
+    function addActivity(title, desc) {
+      const time = new Date().toLocaleTimeString();
+      activities.unshift({ title, desc, time });
+      
+      if (activities.length > MAX_ACTIVITIES) {
+        activities = activities.slice(0, MAX_ACTIVITIES);
+      }
+      
+      renderActivities();
+    }
+
+    // Render activities
+    function renderActivities() {
+      const timeline = document.getElementById('activityTimeline');
+      
+      if (activities.length === 0) {
+        timeline.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No recent activity</div>';
+        return;
+      }
+      
+      timeline.innerHTML = activities.map(act => `
+        <div class="activity-item">
+          <div class="activity-time">${act.time}</div>
+          <div class="activity-content">
+            <div class="activity-title">${act.title}</div>
+            <div class="activity-desc">${act.desc}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Update opportunities table
+    function updateOpportunitiesTable(opps) {
+      const table = document.getElementById('oppTable');
+      
+      if (opps.length === 0) {
+        table.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888;">No opportunities</td></tr>';
+        return;
+      }
+      
+      table.innerHTML = opps.map(opp => {
+        const spreadClass = opp.netSpread >= 2.5 ? 'spread-high' : 
+                           opp.netSpread >= 1.5 ? 'spread-med' : 'spread-low';
+        
+        return `
+          <tr>
+            <td><strong>${opp.coin}</strong></td>
+            <td>${opp.buyM} → ${opp.sellM}</td>
+            <td class="${spreadClass}">${opp.netSpread.toFixed(2)}%</td>
+            <td>${opp.qualityScore || 'N/A'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Initialize
+    addLog('info', '🚀 Live Monitor initialized');
+    addActivity('System Started', 'Live monitoring active');
+
+    // Start monitoring
+    fetchLiveData();
+    fetchTradingStatus();
+
+    setInterval(fetchLiveData, 5000);        // Every 5s
+    setInterval(fetchTradingStatus, 15000);  // Every 15s
+
+    // Real-time clock
+    setInterval(() => {
+      const now = new Date().toLocaleTimeString();
+      addLog('info', `⏰ System check - ${now}`);
+    }, 60000); // Every minute
+  </script>
+</body>
+</html>
