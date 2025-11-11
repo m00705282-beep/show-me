@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crypto Arbitrage Dashboard — Live Monitor</title>
+  <style>
+    :root{
+      --bg:#0b1116; --card:#0f1720; --muted:#93a5b1; --text:#e6eef6;
+      --pos:#19c37d; --neg:#ff6b6b; --accent:#4f7cff; --border:#182230;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+      --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--sans); background:linear-gradient(180deg,#061019,#07111a 60%); color:var(--text); min-height:100vh}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(8,14,20,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+    header h1{margin:0;font-size:17px;font-weight:600}
+    .status{display:flex;gap:12px;align-items:center;font-size:13px}
+    .status .dot{width:8px;height:8px;border-radius:50%;background:var(--neg)}
+    .status .dot.on{background:var(--pos)}
+    .container{display:grid;grid-template-columns:1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden}
+    .card .head{padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;color:#cfe6ff}
+    .card .body{padding:14px}
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    input, select, button{background:#071423;color:var(--text);border:1px solid var(--border);padding:9px 12px;border-radius:8px;font-size:13px;outline:none}
+    button{background:linear-gradient(180deg,var(--accent),#2b5de6);border:0;color:white;cursor:pointer;font-weight:600}
+    button:hover{background:linear-gradient(180deg,#5a8aff,#3a5eea)}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .muted{color:var(--muted);font-size:13px}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .kpi .box{background:#071926;padding:12px;border-radius:10px;border:1px solid var(--border)}
+    .kpi .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .kpi .value{font-family:var(--mono);font-size:20px;font-weight:600}
+    .kpi.compact .box{padding:8px}
+    .kpi.compact .label{font-size:11px;margin-bottom:4px}
+    .kpi.compact .value{font-size:15px}
+    .table-wrap{height:580px; overflow:auto;border:1px solid var(--border);border-radius:10px;background:#08121a}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{position:sticky;top:0;background:#0b1320;padding:10px 8px;text-align:left;border-bottom:1px solid var(--border);z-index:2;color:#b9d4ff;font-weight:600}
+    tbody td{padding:11px 8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    tbody tr:hover{background:rgba(79,124,255,0.06)}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#0a2535;border:1px solid var(--border);font-weight:600;font-size:12px}
+    .pos{color:var(--pos)} .neg{color:var(--neg)}
+    .profit-high{background:rgba(25,195,125,0.15);border-left:3px solid var(--pos)}
+    .profit-low{background:rgba(255,107,107,0.08);border-left:3px solid var(--neg)}
+    thead th{cursor:pointer;-webkit-user-select:none;user-select:none}
+    thead th:hover{background:#0d1825}
+    thead th.sorted{color:var(--accent)}
+    thead th.sorted::after{content:' ▼';font-size:10px}
+    thead th.sorted.asc::after{content:' ▲'}
+    .footer{padding:12px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+    .search{flex:1;min-width:200px}
+    .small{font-size:12px;color:var(--muted)}
+    .fw-normal{font-weight:400}
+    .body--top{padding-top:16px}
+    .controls--spaced{margin-bottom:12px}
+    .panel{background:#0a1825;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px}
+    .panel--compact{padding:12px}
+    .panel-alt{background:#071722;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+    .panel-alt--tight{border-radius:6px;padding:6px;margin-bottom:0}
+    .panel-title{font-weight:600;font-size:12px;color:#cfe6ff;margin-bottom:8px}
+    .panel-title--lg{font-size:13px}
+    .flex-between{display:flex;align-items:center;justify-content:space-between}
+    .flex-gap-8{display:flex;gap:8px;align-items:center}
+    .flex-gap-10{display:flex;gap:10px;align-items:center}
+    .flex-wrap{flex-wrap:wrap}
+    .btn-block{flex:1;min-width:120px}
+    .btn-compact{padding:4px 8px;font-size:11px}
+    .log-content{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0;white-space:pre-wrap}
+    .is-hidden{display:none}
+    .mb-0{margin-bottom:0}
+    .mb-8{margin-bottom:8px}
+    .mb-10{margin-bottom:10px}
+    .mb-12{margin-bottom:12px}
+    .mt-10{margin-top:10px}
+    .panel-secondary{background:#0a1825;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+    .panel-alt-scroll{max-height:300px;overflow:auto}
+    .panel-secondary .panel-title{font-size:13px}
+    .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .text-pos{color:var(--pos)}
+    .fw-600{font-weight:600}
+    .fw-700{font-weight:700}
+    .text-sm{font-size:12px}
+    .text-xs{font-size:11px}
+    .mono-small{font-family:var(--mono);font-size:10px;color:var(--text)}
+    .th-w-90{width:90px}
+    .th-w-110{width:110px}
+    .th-w-100{width:100px}
+    .th-w-85{width:85px}
+    .th-w-75{width:75px}
+    .table-empty{padding:32px;text-align:center}
+    .table-empty--compact{padding:24px;text-align:center}
+    .actions-row{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+    .text-center{text-align:center}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚀 Crypto Arbitrage — Live Monitor <span class="small fw-normal" id="lastUpdated"></span></h1>
+    <div class="status">
+      <span class="muted">Server:</span>
+      <span class="dot" id="statusDot"></span>
+      <span id="serverStatus">connecting…</span>
+    </div>
+  </header>
+ 
+  <main class="container">
+    <section class="card">
+      <div class="body body--top">
+        <div class="controls controls--spaced">
+          <input id="filter" class="search" placeholder="🔍 Filter by coin or exchange…" />
+          <label for="minSpread" class="visually-hidden">Minimum spread filter</label>
+          <select id="minSpread" aria-label="Minimum spread filter">
+            <option value="0">Min spread: 0%</option>
+            <option value="0.1">Min spread: 0.1%</option>
+            <option value="0.25">Min spread: 0.25%</option>
+            <option value="0.5">Min spread: 0.5%</option>
+            <option value="1">Min spread: 1%</option>
+            <option value="2">Min spread: 2%</option>
+          </select>
+          <button id="refreshBtn">🔄 Refresh</button>
+        </div>
+ 
+        <!-- Performance Panel -->
+        <div class="panel">
+          <div class="panel-title">🔥 LIVE Trading Performance</div>
+          <div class="kpi compact mb-8">
+            <div class="box">
+              <div class="label">Available Balance</div>
+              <div class="value" id="perfBalance">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Today's Profit</div>
+              <div class="value pos" id="perfProfit">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Today's ROI</div>
+              <div class="value" id="perfROI">0.00%</div>
+            </div>
+          </div>
+          <div class="kpi compact mb-8">
+            <div class="box">
+              <div class="label">Profit 24h</div>
+              <div class="value" id="perf24h">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Profit 7d</div>
+              <div class="value" id="perf7d">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Profit 30d</div>
+              <div class="value" id="perf30d">$0.00</div>
+            </div>
+          </div>
+          <div class="panel-alt panel-alt--tight">
+            <div class="muted mb-4 text-xs">💼 Wallet Distribution:</div>
+            <div id="walletInfo" class="mono-small">Loading...</div>
+          </div>
+        </div>
+
+        <div class="kpi compact">
+          <div class="box">
+            <div class="label">Coins Monitored</div>
+            <div class="value" id="kCoins">—</div>
+          </div>
+          <div class="box">
+            <div class="label">Opportunities</div>
+            <div class="value pos" id="kOpps">—</div>
+          </div>
+          <div class="box">
+            <div class="label">Top Spread</div>
+            <div class="value" id="kTop">—</div>
+          </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="panel panel--compact mb-12">
+          <div class="flex-between mb-10">
+            <div class="panel-title panel-title--lg">⚙️ Control Panel</div>
+            <div class="flex-gap-8">
+              <span class="muted text-sm">PM2 Status:</span>
+              <span id="pm2Status" class="text-pos fw-600 text-sm">—</span>
+            </div>
+          </div>
+          <div class="flex-gap-8 flex-wrap">
+            <button id="restartBtn" class="btn-block">🔄 Restart</button>
+            <button id="logsBtn" class="btn-block">📜 View Logs</button>
+            <button id="statsBtn" class="btn-block">📊 Paper Stats</button>
+          </div>
+        </div>
+
+        <!-- Logs Panel (hidden by default) -->
+        <div id="logsPanel" class="panel-alt panel-alt-scroll is-hidden">
+          <div class="flex-between mb-8">
+            <div class="panel-title panel-title--lg">📜 System Logs</div>
+            <button id="closeLogsBtn" class="btn-compact">✕ Close</button>
+          </div>
+          <pre id="logsContent" class="log-content"></pre>
+        </div>
+
+        <!-- Stats Panel (hidden by default) -->
+        <div id="statsPanel" class="panel-secondary is-hidden">
+          <div class="flex-between mb-8">
+            <div class="panel-title panel-title--lg">📊 Paper Trading Statistics</div>
+            <button id="closeStatsBtn" class="btn-compact">✕ Close</button>
+          </div>
+          <div class="kpi mb-0">
+            <div class="box">
+              <div class="label">Balance</div>
+              <div class="value" id="paperBalance">$10,000</div>
+            </div>
+            <div class="box">
+              <div class="label">Profit/Loss</div>
+              <div class="value" id="paperProfit">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Total Trades</div>
+              <div class="value" id="paperTrades">0</div>
+            </div>
+          </div>
+          <div class="kpi mt-10 mb-0">
+            <div class="box">
+              <div class="label">Win Rate</div>
+              <div class="value" id="paperWinRate">0%</div>
+            </div>
+            <div class="box">
+              <div class="label">Avg Profit/Trade</div>
+              <div class="value" id="paperAvgProfit">$0.00</div>
+            </div>
+            <div class="box">
+              <div class="label">Total Fees</div>
+              <div class="value" id="paperFees">$0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap" id="tableWrap" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th class="th-w-90" data-sort="coin">Coin</th>
+                <th class="th-w-110" data-sort="buyM">Buy @</th>
+                <th class="th-w-100" data-sort="buyP">Buy Price</th>
+                <th class="th-w-110" data-sort="sellM">Sell @</th>
+                <th class="th-w-100" data-sort="sellP">Sell Price</th>
+                <th class="th-w-85" data-sort="grossSpread">Gross %</th>
+                <th class="th-w-75" data-sort="totalFeePct">Fees %</th>
+                <th class="th-w-85 sorted" data-sort="netSpread">Net %</th>
+                <th data-sort="netSpread">Net Profit ($1k)</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr><td colspan="9" class="muted table-empty">⏳ Waiting for data from server…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footer">
+        ⚠️ Read-only monitoring. Verify fees, slippage, and withdrawal limits before executing any trades.
+      </div>
+      <div class="actions-row">
+        <button id="downloadJSON">💾 Download JSON</button>
+        <button id="downloadCSV">📊 Download CSV</button>
+      </div>
+    </section>
+  </main>
+ 
+  <script>
+    // Config
+    const WS_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') 
+      ? 'ws://localhost:8080' 
+      : (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+    const SNAPSHOT_URL = '/api/snapshot';
+ 
+    // API Key for authenticated requests
+    let API_KEY = null;
+    let API_INFO = null;
+    
+    // Fetch API key info on startup
+    async function fetchApiKeyInfo() {
+      try {
+        const r = await fetch('/api/auth/info');
+        API_INFO = await r.json();
+        API_KEY = API_INFO.fullKey;
+        console.log('🔑 [auth] API Key loaded:', API_INFO.masked);
+        console.log('🔒 [auth] Protected endpoints:', API_INFO.endpoints.protected);
+      } catch (err) {
+        console.error('[auth] Failed to load API key:', err);
+      }
+    }
+    
+    // Helper function for authenticated fetch
+    async function authenticatedFetch(url, options = {}) {
+      if (!API_KEY) {
+        console.warn('[auth] API Key not loaded yet, trying without auth...');
+        return fetch(url, options);
+      }
+      
+      // Add API key to headers
+      options.headers = options.headers || {};
+      options.headers['X-API-Key'] = API_KEY;
+      
+      return fetch(url, options);
+    }
+ 
+    // Elements
+    const statusDot = document.getElementById('statusDot');
+    const serverStatus = document.getElementById('serverStatus');
+    const lastUpdated = document.getElementById('lastUpdated');
+    const tbody = document.getElementById('tbody');
+    const kCoins = document.getElementById('kCoins');
+    const kOpps = document.getElementById('kOpps');
+    const kTop = document.getElementById('kTop');
+    const filterEl = document.getElementById('filter');
+    const minSpreadEl = document.getElementById('minSpread');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadJSON');
+    const downloadCSVBtn = document.getElementById('downloadCSV');
+ 
+    let snapshot = { time: 0, spreads: [] };
+    let ws;
+    let reconnectTimer;
+    let sortColumn = 'netSpread';
+    let sortAsc = false;
+ 
+    function formatNum(x){
+      if(x === null || x === undefined) return '—';
+      if(Math.abs(x) >= 1) return x.toFixed(4);
+      return x.toPrecision(6);
+    }
+
+    function formatProfit(spread){
+      if(!spread) return '—';
+      const profit = (spread / 100) * 1000;
+      return `$${profit.toFixed(2)}`;
+    }
+ 
+    function render(){
+      const q = (filterEl.value || '').trim().toLowerCase();
+      const min = parseFloat(minSpreadEl.value || '0');
+ 
+      const rows = snapshot.spreads
+        .filter(r => r.netSpread !== undefined && r.netSpread !== null)
+        .filter(r => r.netSpread >= min)
+        .filter(r => {
+          if(!q) return true;
+          return r.coin.toLowerCase().includes(q) ||
+                 (r.buyM && r.buyM.toLowerCase().includes(q)) ||
+                 (r.sellM && r.sellM.toLowerCase().includes(q));
+        });
+ 
+      // Sort rows
+      rows.sort((a, b) => {
+        let aVal = a[sortColumn];
+        let bVal = b[sortColumn];
+        if (typeof aVal === 'string') {
+          return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+        return sortAsc ? (aVal - bVal) : (bVal - aVal);
+      });
+      
+      if(rows.length === 0){
+        tbody.innerHTML = '<tr><td colspan="9" class="muted table-empty--compact">🔍 No opportunities match your filters.</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map(r => {
+          const rowClass = r.netSpread >= 0.5 ? 'profit-high' : (r.netSpread < 0 ? 'profit-low' : '');
+          return `
+          <tr class="${rowClass}">
+            <td><span class="pill">${r.coin}</span></td>
+            <td>${r.buyM || '—'}</td>
+            <td>${formatNum(r.buyP)}</td>
+            <td>${r.sellM || '—'}</td>
+            <td>${formatNum(r.sellP)}</td>
+            <td class="${r.grossSpread >= 0 ? 'pos' : 'neg'} fw-600">${r.grossSpread?.toFixed(3) || '—'}%</td>
+            <td class="muted text-xs">${r.totalFeePct?.toFixed(2) || '—'}%</td>
+            <td class="${r.netSpread >= 0 ? 'pos' : 'neg'} fw-700">${r.netSpread?.toFixed(3) || '—'}%</td>
+            <td class="${r.netSpread >= 0 ? 'pos' : 'neg'} fw-600">${formatProfit(r.netSpread)}</td>
+          </tr>
+        `}).join('');
+      }
+ 
+      // KPIs
+      kCoins.textContent = snapshot.totalCoins || '—';
+      kOpps.textContent = rows.length;
+      kTop.textContent = snapshot.spreads.length && snapshot.spreads[0].netSpread !== undefined
+        ? snapshot.spreads[0].netSpread.toFixed(3) + '% net' 
+        : '—';
+      lastUpdated.textContent = snapshot.time 
+        ? '• updated ' + new Date(snapshot.time).toLocaleTimeString('sr-RS') 
+        : '';
+    }
+ 
+    function applySnapshot(data){
+      snapshot = {
+        time: data.time || Date.now(),
+        spreads: (data.spreads || []).map(s => ({
+          coin: s.coin || 'UNKNOWN',
+          buyM: s.buyM || null,
+          sellM: s.sellM || null,
+          buyP: s.buyP || null,
+          sellP: s.sellP || null,
+          grossSpread: s.grossSpread !== undefined ? Number(s.grossSpread) : null,
+          netSpread: s.netSpread !== undefined ? Number(s.netSpread) : null,
+          totalFeePct: s.totalFeePct !== undefined ? Number(s.totalFeePct) : null,
+          buyFeeBps: s.buyFeeBps || null,
+          sellFeeBps: s.sellFeeBps || null
+        })),
+        totalCoins: data.totalCoins || (data.spreads ? data.spreads.length : 0)
+      };
+      snapshot.spreads.sort((a,b) => (b.netSpread || 0) - (a.netSpread || 0));
+      render();
+    }
+ 
+    // WebSocket setup
+    function startWS(){
+      if(reconnectTimer) clearTimeout(reconnectTimer);
+      
+      try {
+        ws = new WebSocket(WS_URL);
+      } catch (e) {
+        serverStatus.textContent = 'ws error';
+        statusDot.classList.remove('on');
+        console.error('WebSocket init failed:', e);
+        reconnectTimer = setTimeout(startWS, 5000);
+        return;
+      }
+ 
+      ws.addEventListener('open', () => {
+        serverStatus.textContent = 'connected';
+        statusDot.classList.add('on');
+      });
+ 
+      ws.addEventListener('message', ev => {
+        try {
+          const msg = JSON.parse(ev.data);
+          applySnapshot(msg);
+        } catch (err) {
+          console.error('WS message parse error:', err);
+        }
+      });
+ 
+      ws.addEventListener('close', () => {
+        serverStatus.textContent = 'disconnected';
+        statusDot.classList.remove('on');
+        reconnectTimer = setTimeout(startWS, 5000);
+      });
+ 
+      ws.addEventListener('error', () => {
+        serverStatus.textContent = 'error';
+        statusDot.classList.remove('on');
+      });
+    }
+ 
+    // Fallback fetch
+    async function fetchSnapshot(){
+      try {
+        const r = await fetch(SNAPSHOT_URL);
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        applySnapshot(data);
+        serverStatus.textContent = 'http ok';
+        statusDot.classList.add('on');
+      } catch (err) {
+        serverStatus.textContent = 'http error';
+        statusDot.classList.remove('on');
+        console.error('HTTP snapshot error:', err);
+      }
+    }
+ 
+    // UI handlers
+    refreshBtn.addEventListener('click', fetchSnapshot);
+    filterEl.addEventListener('input', render);
+    minSpreadEl.addEventListener('change', render);
+    downloadBtn.addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = `arbitrage-snapshot-${Date.now()}.json`; 
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('Snapshot downloaded (JSON)');
+    });
+    
+    downloadCSVBtn.addEventListener('click', ()=>{
+      const headers = ['Coin','Buy Exchange','Buy Price','Sell Exchange','Sell Price','Gross %','Fees %','Net %','Net Profit ($1k)'];
+      const rows = snapshot.spreads.map(r => [
+        r.coin,
+        r.buyM || '',
+        r.buyP || '',
+        r.sellM || '',
+        r.sellP || '',
+        r.grossSpread?.toFixed(3) || '',
+        r.totalFeePct?.toFixed(2) || '',
+        r.netSpread?.toFixed(3) || '',
+        formatProfit(r.netSpread)
+      ]);
+      const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `arbitrage-snapshot-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('Snapshot downloaded (CSV)');
+    });
+    
+    // Column sorting
+    document.querySelectorAll('thead th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (sortColumn === col) {
+          sortAsc = !sortAsc;
+        } else {
+          sortColumn = col;
+          sortAsc = false;
+        }
+        document.querySelectorAll('thead th').forEach(h => h.classList.remove('sorted', 'asc'));
+        th.classList.add('sorted');
+        if (sortAsc) th.classList.add('asc');
+        render();
+      });
+    });
+ 
+    // Control Panel handlers
+    const restartBtn = document.getElementById('restartBtn');
+    const logsBtn = document.getElementById('logsBtn');
+    const statsBtn = document.getElementById('statsBtn');
+    const pm2Status = document.getElementById('pm2Status');
+    const logsPanel = document.getElementById('logsPanel');
+    const statsPanel = document.getElementById('statsPanel');
+    const closeLogsBtn = document.getElementById('closeLogsBtn');
+    const closeStatsBtn = document.getElementById('closeStatsBtn');
+    const logsContent = document.getElementById('logsContent');
+
+    // Fetch PM2 status
+    async function fetchPM2Status() {
+      try {
+        const r = await fetch('/api/pm2/status');
+        const data = await r.json();
+        pm2Status.textContent = data.status || 'unknown';
+        pm2Status.style.color = data.status === 'online' ? 'var(--pos)' : 'var(--neg)';
+      } catch (err) {
+        pm2Status.textContent = 'error';
+        pm2Status.style.color = 'var(--neg)';
+      }
+    }
+
+    // Fetch Performance Stats
+    async function fetchPerformanceStats() {
+      try {
+        const r = await fetch('/api/realtrading/status');
+        const data = await r.json();
+        
+        // Update performance values (Real Trading)
+        // Show real balance from exchanges (if available)
+        const realBalance = data.totalAvailableUSD !== undefined ? data.totalAvailableUSD : data.limits.remainingDailyVolume;
+        document.getElementById('perfBalance').textContent = '$' + (realBalance || 0).toFixed(2);
+        document.getElementById('perfProfit').textContent = '$' + (data.dailyProfit || 0).toFixed(2);
+        document.getElementById('perfProfit').className = 'value ' + (data.dailyProfit >= 0 ? 'pos' : 'neg');
+        const roi = data.dailyVolume > 0 ? (data.dailyProfit / data.dailyVolume * 100) : 0;
+        document.getElementById('perfROI').textContent = roi.toFixed(2) + '%';
+        document.getElementById('perfROI').className = 'value ' + (roi >= 0 ? 'pos' : 'neg');
+        
+        // Period profits
+        document.getElementById('perf24h').textContent = '$' + (data.profit24h || 0).toFixed(2);
+        document.getElementById('perf24h').className = 'value ' + ((data.profit24h || 0) >= 0 ? 'pos' : 'neg');
+        document.getElementById('perf7d').textContent = '$' + (data.profit7d || 0).toFixed(2);
+        document.getElementById('perf7d').className = 'value ' + ((data.profit7d || 0) >= 0 ? 'pos' : 'neg');
+        document.getElementById('perf30d').textContent = '$' + (data.profit30d || 0).toFixed(2);
+        document.getElementById('perf30d').className = 'value ' + ((data.profit30d || 0) >= 0 ? 'pos' : 'neg');
+        
+        // Wallet info
+        const wallets = data.wallets || {};
+        const walletLines = Object.entries(wallets)
+          .filter(([coin, amount]) => amount > 0)
+          .map(([coin, amount]) => {
+            if (coin === 'USD') {
+              return `💵 ${coin}: $${amount.toFixed(2)}`;
+            } else {
+              return `🪙 ${coin}: ${amount.toFixed(8)}`;
+            }
+          });
+        
+        document.getElementById('walletInfo').innerHTML = walletLines.length > 0 
+          ? walletLines.join('<br>') 
+          : '💵 USD: $' + (wallets.USD || 0).toFixed(2);
+      } catch (err) {
+        console.error('Failed to fetch performance stats:', err);
+      }
+    }
+
+    // Restart server
+    restartBtn.addEventListener('click', async () => {
+      if (!confirm('Restart server? This will briefly disconnect all clients.')) return;
+      restartBtn.disabled = true;
+      restartBtn.textContent = '⏳ Restarting...';
+      try {
+        const r = await authenticatedFetch('/api/pm2/restart', { method: 'POST' });
+        const data = await r.json();
+        alert(data.message || 'Server restarted');
+        setTimeout(() => {
+          restartBtn.disabled = false;
+          restartBtn.textContent = '🔄 Restart';
+          fetchPM2Status();
+        }, 3000);
+      } catch (err) {
+        alert('Restart failed: ' + err.message);
+        restartBtn.disabled = false;
+        restartBtn.textContent = '🔄 Restart';
+      }
+    });
+
+    // View logs
+    logsBtn.addEventListener('click', async () => {
+      logsPanel.style.display = 'block';
+      logsContent.textContent = 'Loading logs...';
+      try {
+        const r = await authenticatedFetch('/api/pm2/logs?lines=100');
+        const data = await r.json();
+        logsContent.textContent = data.logs || 'No logs available';
+      } catch (err) {
+        logsContent.textContent = 'Error loading logs: ' + err.message;
+      }
+    });
+
+    closeLogsBtn.addEventListener('click', () => {
+      logsPanel.style.display = 'none';
+    });
+
+    // View paper trading stats
+    statsBtn.addEventListener('click', async () => {
+      statsPanel.style.display = 'block';
+      try {
+        const r = await fetch('/api/paper/stats');
+        const data = await r.json();
+        
+        document.getElementById('paperBalance').textContent = '$' + data.currentBalance.toFixed(2);
+        document.getElementById('paperProfit').textContent = '$' + data.profit.toFixed(2);
+        document.getElementById('paperProfit').style.color = data.profit >= 0 ? 'var(--pos)' : 'var(--neg)';
+        document.getElementById('paperTrades').textContent = data.totalTrades;
+        document.getElementById('paperWinRate').textContent = data.winRate.toFixed(1) + '%';
+        document.getElementById('paperAvgProfit').textContent = '$' + data.avgProfitPerTrade.toFixed(2);
+        document.getElementById('paperFees').textContent = '$' + data.totalFees.toFixed(2);
+      } catch (err) {
+        alert('Error loading stats: ' + err.message);
+      }
+    });
+
+    closeStatsBtn.addEventListener('click', () => {
+      statsPanel.style.display = 'none';
+    });
+
+    // Start
+    console.log('Crypto Arbitrage Dashboard initialized');
+    fetchApiKeyInfo(); // Load API key first
+    startWS();
+    fetchSnapshot(); // HTTP fallback on load
+    fetchPM2Status(); // Initial PM2 status
+    fetchPerformanceStats(); // Initial performance stats
+    setInterval(fetchSnapshot, 35_000); // periodic fallback every 35s
+    setInterval(fetchPM2Status, 15_000); // PM2 status every 15s
+    setInterval(fetchPerformanceStats, 30_000); // Performance stats every 30s (optimized from 5s)
+  </script>
+</body>
+</html>
