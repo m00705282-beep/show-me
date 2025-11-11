@@ -1,0 +1,125 @@
+{
+  "comment": "Real Trading Configuration - USDT TEST MODE",
+  "warning": "⚠️ THIS USES REAL MONEY! Test with small amounts first!",
+  
+  "enabled": true,
+  "dryRun": false,
+  
+  "tradingPairs": {
+    "focus": "USDT",
+    "comment": "Focus on USDT pairs for initial testing",
+    "allowedQuotes": ["USDT"],
+    "preferredPairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "BNB/USDT",
+      "SOL/USDT",
+      "XRP/USDT",
+      "ADA/USDT",
+      "AVAX/USDT",
+      "DOT/USDT",
+      "MATIC/USDT",
+      "LINK/USDT"
+    ]
+  },
+  
+  "safetyCaps": {
+    "maxTradeSize": 15,
+    "maxDailyVolume": 40,
+    "maxOpenPositions": 2,
+    "minSpreadRequired": 2.0,
+    "maxConsecutiveLosses": 2,
+    "maxDailyLoss": 10,
+    "comment": "Conservative limits for USDT testing"
+  },
+  
+  "approval": {
+    "requireApproval": true,
+    "autoApproveUnder": 0,
+    "comment": "Require manual approval for ALL trades during testing"
+  },
+  
+  "exchanges": {
+    "binance": {
+      "enabled": false,
+      "comment": "SET TO TRUE AND ADD YOUR REAL API KEYS",
+      "apiKey": "YOUR_BINANCE_API_KEY_HERE",
+      "secret": "YOUR_BINANCE_SECRET_HERE",
+      "sandboxMode": false,
+      "instructions": {
+        "step1": "Create API key at https://www.binance.com/en/my/settings/api-management",
+        "step2": "Enable ONLY 'Enable Spot & Margin Trading' permission",
+        "step3": "Restrict to your IP address for security",
+        "step4": "DISABLE 'Enable Withdrawals' - VERY IMPORTANT!",
+        "step5": "NEVER share your secret key!"
+      }
+    },
+    "kraken": {
+      "enabled": false,
+      "apiKey": "YOUR_KRAKEN_API_KEY_HERE",
+      "secret": "YOUR_KRAKEN_SECRET_HERE",
+      "instructions": {
+        "step1": "Create API key at https://www.kraken.com/u/security/api",
+        "step2": "Enable 'Query Funds' and 'Create & Modify Orders'",
+        "step3": "Set withdrawal limit to 0",
+        "step4": "Use 2FA for additional security"
+      }
+    },
+    "kucoin": {
+      "enabled": false,
+      "apiKey": "YOUR_KUCOIN_API_KEY_HERE",
+      "secret": "YOUR_KUCOIN_SECRET_HERE",
+      "password": "YOUR_KUCOIN_PASSWORD_HERE",
+      "instructions": {
+        "step1": "Create API at https://www.kucoin.com/account/api",
+        "step2": "Enable 'General' and 'Trade' permissions only",
+        "step3": "Disable 'Transfer' and 'Withdraw' permissions",
+        "step4": "Set IP whitelist"
+      }
+    }
+  },
+  
+  "notifications": {
+    "onTrade": true,
+    "onApprovalRequired": true,
+    "onEmergencyStop": true,
+    "onDailyLimitReached": true,
+    "onProfitMilestone": true,
+    "onLoss": true
+  },
+  
+  "riskManagement": {
+    "slippageTolerance": 0.5,
+    "priceUpdateTimeout": 30,
+    "minLiquidity": 10000,
+    "maxPriceAge": 60,
+    "comment": "Risk parameters for USDT trading"
+  },
+  
+  "testing": {
+    "testMode": {
+      "description": "Initial USDT testing configuration",
+      "startDate": "2025-11-06",
+      "initialBalance": 50,
+      "targetProfit": 5,
+      "maxTestDuration": "7 days",
+      "recommendations": [
+        "Monitor first 24-48h closely",
+        "Start with $15 max trade size",
+        "Always approve trades manually",
+        "Keep emergency stop button ready",
+        "Track all trades in spreadsheet",
+        "Test with 2-3 exchanges maximum"
+      ]
+    }
+  },
+  
+  "emergencyContacts": {
+    "comment": "Configure alert system in config/alerts.json",
+    "recommendedAlerts": [
+      "Email notifications",
+      "Telegram bot",
+      "SMS for critical events"
+    ]
+  }
+}
