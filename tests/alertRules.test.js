@@ -4,7 +4,7 @@
  */
 
 import { expect } from 'chai';
-import { AlertRulesEngine } from '../monitoring/alertRules.js';
+import AlertRulesEngine from '../monitoring/alertRules.js';
 
 describe('AlertRulesEngine', () => {
   let engine;
