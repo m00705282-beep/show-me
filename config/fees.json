@@ -1,0 +1,263 @@
+{
+  "comment": "Fee schedules per exchange (in basis points, 1 bp = 0.01%). Verify on official exchange docs before use.",
+  "lastUpdated": "2025-11-05 (verified)",
+  "exchanges": {
+    "binance": {
+      "maker": 10,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.005,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Standard tier. VIP tiers have lower fees."
+    },
+    "kraken": {
+      "maker": 16,
+      "taker": 26,
+      "withdrawal": {
+        "BTC": 0.00015,
+        "ETH": 0.0025,
+        "USDT": 5.0,
+        "default": 0
+      },
+      "notes": "Starter tier. Volume-based discounts available."
+    },
+    "coinbase": {
+      "maker": 40,
+      "taker": 60,
+      "withdrawal": {
+        "BTC": 0.0,
+        "ETH": 0.0,
+        "USDT": 0.0,
+        "default": 0
+      },
+      "notes": "Coinbase Exchange. Free withdrawals for most assets."
+    },
+    "bitfinex": {
+      "maker": 10,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.0004,
+        "ETH": 0.0027,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Base tier. Maker rebates available for high volume."
+    },
+    "kucoin": {
+      "maker": 10,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.005,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Level 1. VIP levels have lower fees."
+    },
+    "okx": {
+      "maker": 8,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.0004,
+        "ETH": 0.003,
+        "USDT": 0.8,
+        "default": 0
+      },
+      "notes": "Regular user. VIP tiers available."
+    },
+    "gateio": {
+      "maker": 20,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.001,
+        "ETH": 0.006,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "VIP 0. Lower fees for higher VIP levels."
+    },
+    "huobi": {
+      "maker": 20,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.005,
+        "USDT": 2.0,
+        "default": 0
+      },
+      "notes": "Standard tier. HT holders get discounts."
+    },
+    "gemini": {
+      "maker": 20,
+      "taker": 40,
+      "withdrawal": {
+        "BTC": 0.0,
+        "ETH": 0.0,
+        "USDT": 0.0,
+        "default": 0
+      },
+      "notes": "API tier. 10 free withdrawals/month."
+    },
+    "poloniex": {
+      "maker": 0,
+      "taker": 12,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.005,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Maker rebate program active."
+    },
+    "bybit": {
+      "maker": 10,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.005,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Spot trading. Derivatives have different fees."
+    },
+    "mexc": {
+      "maker": 0,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.004,
+        "USDT": 0.8,
+        "default": 0
+      },
+      "notes": "0% maker fees promotion."
+    },
+    "bitget": {
+      "maker": 10,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.0006,
+        "ETH": 0.005,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Standard tier. BGB holders get discounts."
+    },
+    "coinex": {
+      "maker": 20,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.001,
+        "ETH": 0.01,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "VIP 0. CET holders get fee reductions."
+    },
+    "bitstamp": {
+      "maker": 50,
+      "taker": 50,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.0,
+        "USDT": 0.0,
+        "default": 0
+      },
+      "notes": "Base tier. Volume discounts available."
+    },
+    "cryptocom": {
+      "maker": 7,
+      "taker": 7,
+      "withdrawal": {
+        "BTC": 0.0006,
+        "ETH": 0.006,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "CRO stakers get fee discounts."
+    },
+    "upbit": {
+      "maker": 5,
+      "taker": 5,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.01,
+        "default": 0
+      },
+      "notes": "Korean exchange. KRW pairs have different fees."
+    },
+    "bithumb": {
+      "maker": 25,
+      "taker": 25,
+      "withdrawal": {
+        "BTC": 0.001,
+        "ETH": 0.01,
+        "default": 0
+      },
+      "notes": "Korean exchange. Volume-based discounts."
+    },
+    "coinone": {
+      "maker": 20,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.001,
+        "ETH": 0.01,
+        "default": 0
+      },
+      "notes": "Korean exchange. Standard tier."
+    },
+    "hitbtc": {
+      "maker": -1,
+      "taker": 9,
+      "withdrawal": {
+        "BTC": 0.0006,
+        "ETH": 0.006,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "Negative maker fee = rebate."
+    },
+    "indodax": {
+      "maker": 0,
+      "taker": 30,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.01,
+        "default": 0
+      },
+      "notes": "Indonesian exchange. IDR pairs available."
+    },
+    "lbank": {
+      "maker": 10,
+      "taker": 10,
+      "withdrawal": {
+        "BTC": 0.001,
+        "ETH": 0.01,
+        "USDT": 2.0,
+        "default": 0
+      },
+      "notes": "Standard tier. LBK holders get discounts."
+    },
+    "probit": {
+      "maker": 20,
+      "taker": 20,
+      "withdrawal": {
+        "BTC": 0.0005,
+        "ETH": 0.006,
+        "USDT": 1.0,
+        "default": 0
+      },
+      "notes": "PROB holders get fee reductions."
+    }
+  },
+  "defaultFees": {
+    "maker": 20,
+    "taker": 20,
+    "withdrawal": {
+      "default": 0
+    },
+    "notes": "Fallback for exchanges not in config"
+  }
+}
