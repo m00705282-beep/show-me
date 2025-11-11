@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "confidenceThreshold": 0.7,
+  "onlyTradeOnSafePrediction": true,
+  "useHeuristics": true
+}
