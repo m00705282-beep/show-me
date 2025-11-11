@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel - Crypto Arbitrage System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0a0e1a;
+      --card: #1a1f35;
+      --border: #2d3748;
+      --text: #f0f4f8;
+      --text-muted: #94a3b8;
+      --green: #10b981;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --orange: #f59e0b;
+      --purple: #8b5cf6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #111827 0%, #1a1f35 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--card);
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    
+    .metric {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    
+    .metric-sm {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .badge-green { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .badge-blue { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+    .badge-orange { background: rgba(245, 158, 11, 0.2); color: var(--orange); }
+    
+    .exchange-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .exchange-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .exchange-balance {
+      font-weight: 700;
+      color: var(--green);
+    }
+    
+    .coin-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.625rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .coin-item:last-child { border-bottom: none; }
+    
+    .coin-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .coin-amount {
+      font-family: monospace;
+      color: var(--blue);
+    }
+    
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #475569;
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--green);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+    
+    .feature-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .feature-icon {
+      font-size: 1.5rem;
+    }
+    
+    .feature-details h4 {
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .feature-details p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-danger {
+      background: var(--red);
+      color: white;
+    }
+    
+    .opportunity-item {
+      display: grid;
+      grid-template-columns: 100px 150px 150px 100px 120px;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .opp-header {
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-blue { color: var(--blue); }
+    .text-orange { color: var(--orange); }
+    
+    .scroll-area {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .scroll-area::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scroll-area::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    
+    .scroll-area::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .info-item {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .status-label {
+      font-weight: 600;
+    }
+
+    .status-timestamp {
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+    }
+
+    .section-spacing {
+      margin-top: 1.5rem;
+    }
+
+    .card-header-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .loading-placeholder {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>⚡ CRYPTO ARBITRAGE CONTROL PANEL</h1>
+    <div class="status">
+      <div class="status-dot"></div>
+      <span class="status-label">LIVE</span>
+      <span class="status-timestamp" id="lastUpdate">--:--:--</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Key Metrics -->
+    <section class="grid grid-4">
+      <div class="card">
+        <div class="card-title">💰 TOTAL CAPITAL</div>
+        <div class="metric text-green" id="totalBalance">$0.00</div>
+        <div class="label">Across All Exchanges</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">📈 TODAY'S PROFIT</div>
+        <div class="metric text-blue" id="todayProfit">$0.00</div>
+        <div class="label" id="todayROI">ROI: 0.00%</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">🔥 ACTIVE TRADES</div>
+        <div class="metric" id="activeTrades">0</div>
+        <div class="label">In Progress</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">🎯 OPPORTUNITIES</div>
+        <div class="metric text-orange" id="totalOpportunities">0</div>
+        <div class="label">Live Arbitrage</div>
+      </div>
+    </section>
+
+    <!-- Exchange Balances & Trading Pairs -->
+    <section class="grid grid-2 section-spacing">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏦 EXCHANGE BALANCES</div>
+          <button class="btn btn-primary" onclick="refreshBalances()">🔄 Refresh</button>
+        </div>
+        <div class="scroll-area" id="exchangeList">
+          <div class="exchange-item">
+            <span class="exchange-name">Loading...</span>
+            <span class="exchange-balance">--</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💎 ACTIVE TRADING PAIRS</div>
+          <span class="badge badge-blue" id="pairCount">0 pairs</span>
+        </div>
+        <div class="scroll-area" id="pairsList">
+          <div class="coin-item">
+            <span class="coin-name">Loading...</span>
+            <span class="coin-amount">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature Controls -->
+    <section class="card section-spacing">
+      <div class="card-header">
+        <div class="card-title">⚙️ FEATURE CONTROLS - ENABLE/DISABLE</div>
+        <div class="card-header-actions">
+          <button class="btn btn-primary" onclick="enableAll()">✅ Enable All</button>
+          <button class="btn btn-danger" onclick="disableAll()">❌ Disable All</button>
+        </div>
+      </div>
+      <div class="grid grid-2" id="featureControls">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- Live Opportunities -->
+    <section class="card section-spacing">
+      <div class="card-header">
+        <div class="card-title">🚀 LIVE ARBITRAGE OPPORTUNITIES</div>
+        <button class="btn btn-primary" onclick="refreshOpportunities()">🔄 Refresh</button>
+      </div>
+      <div class="opportunity-item opp-header">
+        <div>COIN</div>
+        <div>BUY EXCHANGE</div>
+        <div>SELL EXCHANGE</div>
+        <div>SPREAD</div>
+        <div>PROFIT</div>
+      </div>
+      <div class="scroll-area" id="opportunitiesList">
+        <div class="loading-placeholder">
+          Loading opportunities...
+        </div>
+      </div>
+    </section>
+
+    <!-- System Info -->
+    <section class="grid grid-3 section-spacing">
+      <div class="card">
+        <div class="card-title">📊 TRADING STATISTICS</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Total Trades</div>
+            <div class="info-value" id="totalTrades">0</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Success Rate</div>
+            <div class="info-value text-green" id="successRate">0%</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Avg Profit</div>
+            <div class="info-value text-blue" id="avgProfit">$0</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Best Trade</div>
+            <div class="info-value text-green" id="bestTrade">$0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">💼 PORTFOLIO</div>
+        <div class="scroll-area" id="portfolioList">
+          <div class="coin-item">
+            <span>Loading portfolio...</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">⚡ SYSTEM STATUS</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Uptime</div>
+            <div class="info-value" id="uptime">--</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Mode</div>
+            <div class="info-value" id="tradingMode">
+              <span class="badge badge-orange">DRY-RUN</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Exchanges</div>
+            <div class="info-value" id="exchangeCount">0</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">API Calls</div>
+            <div class="info-value" id="apiCalls">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8080';
+    
+    const FEATURES = [
+      { id: 'positionSizing', name: 'Dynamic Position Sizing', icon: '📊', enabled: true },
+      { id: 'multiTrade', name: 'Multi-Trade Executor', icon: '🔥', enabled: true },
+      { id: 'feeOptimizer', name: 'Fee Optimizer', icon: '💎', enabled: true },
+      { id: 'compounding', name: 'Profit Compounding', icon: '📈', enabled: true },
+      { id: 'tradingHours', name: 'Trading Hours Optimizer', icon: '⏰', enabled: true },
+      { id: 'coinExpansion', name: 'Coin Pair Expansion', icon: '💰', enabled: true },
+      { id: 'flashDetector', name: 'Flash Arbitrage Detector', icon: '⚡', enabled: true },
+      { id: 'gasOptimizer', name: 'Gas Fee Optimizer', icon: '⛽', enabled: true },
+      { id: 'riskManager', name: 'Advanced Risk Manager', icon: '🛡️', enabled: true },
+      { id: 'smartRouter', name: 'Smart Order Router', icon: '🎯', enabled: true },
+      { id: 'apiKeyManager', name: 'API Key Security', icon: '🔐', enabled: true },
+      { id: 'latency', name: 'Latency Optimizer', icon: '🚀', enabled: true },
+      { id: 'aiBalance', name: 'AI Balance Predictor', icon: '🧠', enabled: true },
+      { id: 'autoTransfer', name: 'Auto Transfer', icon: '💸', enabled: false },
+      { id: 'mlPredictor', name: 'ML Price Predictor', icon: '🔮', enabled: true }
+    ];
+
+    // Load exchange balances
+    async function loadExchangeBalances() {
+      try {
+        const response = await fetch(`${API_BASE}/api/snapshot`);
+        const data = await response.json();
+        
+        const exchangeList = document.getElementById('exchangeList');
+        exchangeList.innerHTML = '';
+        
+        if (data.exchanges && data.exchanges.length > 0) {
+          let totalBalance = 0;
+          
+          data.exchanges.forEach(ex => {
+            const balance = ex.balance || 0;
+            totalBalance += balance;
+            
+            const item = document.createElement('div');
+            item.className = 'exchange-item';
+            item.innerHTML = `
+              <span class="exchange-name">🏦 ${ex.name || ex}</span>
+              <span class="exchange-balance">$${balance.toFixed(2)}</span>
+            `;
+            exchangeList.appendChild(item);
+          });
+          
+          document.getElementById('totalBalance').textContent = `$${totalBalance.toFixed(2)}`;
+          document.getElementById('exchangeCount').textContent = data.exchanges.length;
+        } else {
+          exchangeList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No exchange data available</div>';
+        }
+      } catch (error) {
+        console.error('Error loading balances:', error);
+      }
+    }
+
+    // Load trading pairs
+    async function loadTradingPairs() {
+      try {
+        const response = await fetch(`${API_BASE}/api/snapshot`);
+        const data = await response.json();
+        
+        const pairsList = document.getElementById('pairsList');
+        pairsList.innerHTML = '';
+        
+        if (data.opportunities && data.opportunities.length > 0) {
+          const coins = [...new Set(data.opportunities.map(o => o.coin))];
+          
+          document.getElementById('pairCount').textContent = `${coins.length} coins`;
+          
+          coins.slice(0, 20).forEach(coin => {
+            const item = document.createElement('div');
+            item.className = 'coin-item';
+            item.innerHTML = `
+              <span class="coin-name">💎 ${coin}/USDT</span>
+              <span class="coin-amount">Active</span>
+            `;
+            pairsList.appendChild(item);
+          });
+        } else {
+          pairsList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No active pairs</div>';
+        }
+      } catch (error) {
+        console.error('Error loading pairs:', error);
+      }
+    }
+
+    // Load opportunities
+    async function loadOpportunities() {
+      try {
+        const response = await fetch(`${API_BASE}/api/snapshot`);
+        const data = await response.json();
+        
+        const oppList = document.getElementById('opportunitiesList');
+        oppList.innerHTML = '';
+        
+        if (data.opportunities && data.opportunities.length > 0) {
+          document.getElementById('totalOpportunities').textContent = data.opportunities.length;
+          
+          data.opportunities.slice(0, 10).forEach(opp => {
+            const item = document.createElement('div');
+            item.className = 'opportunity-item';
+            const spread = ((opp.netSpread || 0) * 100).toFixed(2);
+            const profit = (opp.expectedProfit || 0).toFixed(2);
+            
+            item.innerHTML = `
+              <div><strong>${opp.coin}</strong></div>
+              <div>${opp.buyExchange}</div>
+              <div>${opp.sellExchange}</div>
+              <div class="${spread > 1 ? 'text-green' : 'text-blue'}">${spread}%</div>
+              <div class="text-green">$${profit}</div>
+            `;
+            oppList.appendChild(item);
+          });
+        } else {
+          oppList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">No opportunities found</div>';
+        }
+      } catch (error) {
+        console.error('Error loading opportunities:', error);
+      }
+    }
+
+    // Load stats
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/paper-trading/stats`);
+        const data = await response.json();
+        
+        if (data.totalTrades !== undefined) {
+          document.getElementById('totalTrades').textContent = data.totalTrades;
+          document.getElementById('successRate').textContent = `${((data.successfulTrades / data.totalTrades * 100) || 0).toFixed(1)}%`;
+          document.getElementById('avgProfit').textContent = `$${(data.averageProfit || 0).toFixed(2)}`;
+          document.getElementById('bestTrade').textContent = `$${(data.bestTrade || 0).toFixed(2)}`;
+          document.getElementById('todayProfit').textContent = `$${(data.totalProfit || 0).toFixed(2)}`;
+          document.getElementById('todayROI').textContent = `ROI: ${((data.totalProfit / 10000 * 100) || 0).toFixed(2)}%`;
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Render feature controls
+    function renderFeatureControls() {
+      const container = document.getElementById('featureControls');
+      container.innerHTML = '';
+      
+      FEATURES.forEach(feature => {
+        const row = document.createElement('div');
+        row.className = 'feature-row';
+        row.innerHTML = `
+          <div class="feature-info">
+            <span class="feature-icon">${feature.icon}</span>
+            <div class="feature-details">
+              <h4>${feature.name}</h4>
+              <p>${feature.enabled ? 'Currently active' : 'Currently disabled'}</p>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" ${feature.enabled ? 'checked' : ''} onchange="toggleFeature('${feature.id}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleFeature(id, enabled) {
+      const feature = FEATURES.find(f => f.id === id);
+      if (feature) {
+        feature.enabled = enabled;
+        console.log(`${feature.name}: ${enabled ? 'ENABLED' : 'DISABLED'}`);
+        // TODO: Send to backend API
+      }
+    }
+
+    function enableAll() {
+      FEATURES.forEach(f => f.enabled = true);
+      renderFeatureControls();
+      console.log('All features ENABLED');
+    }
+
+    function disableAll() {
+      if (confirm('Are you sure you want to disable all features?')) {
+        FEATURES.forEach(f => f.enabled = false);
+        renderFeatureControls();
+        console.log('All features DISABLED');
+      }
+    }
+
+    function refreshBalances() {
+      loadExchangeBalances();
+      loadTradingPairs();
+    }
+
+    function refreshOpportunities() {
+      loadOpportunities();
+    }
+
+    function updateTime() {
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFeatureControls();
+      loadExchangeBalances();
+      loadTradingPairs();
+      loadOpportunities();
+      loadStats();
+      updateTime();
+      
+      // Auto-refresh every 5 seconds
+      setInterval(() => {
+        loadExchangeBalances();
+        loadTradingPairs();
+        loadOpportunities();
+        loadStats();
+        updateTime();
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
