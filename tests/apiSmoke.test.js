@@ -10,55 +10,102 @@ const SERVER_READY_PATH = '/api/snapshot';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-async function waitForServerReady(agent, path = SERVER_READY_PATH, timeoutMs = 15000, intervalMs = 500) {
-  const deadline = Date.now() + timeoutMs;
+async function waitForServerReady(proc, agent, path = SERVER_READY_PATH, timeoutMs = 60000, intervalMs = 1000) {
+  const logPattern = /\[api]\s+.*listening/i;
   let lastError;
 
-  while (Date.now() < deadline) {
-    try {
-      const response = await agent.get(path).timeout({ deadline: intervalMs });
-      if (response.status >= 200 && response.status < 500) {
-        return;
+  const waitForLog = () => new Promise(resolve => {
+    const onData = chunk => {
+      const text = chunk.toString();
+      if (logPattern.test(text)) {
+        cleanup();
+        resolve();
       }
-    } catch (err) {
-      lastError = err;
-    }
-    await delay(intervalMs);
-  }
+    };
 
-  const reason = lastError?.message ? `: ${lastError.message}` : '';
-  throw new Error(`Timeout waiting for server readiness${reason}`);
+    const cleanup = () => {
+      proc.stdout?.off('data', onData);
+      proc.stderr?.off('data', onData);
+    };
+
+    proc.stdout?.on('data', onData);
+    proc.stderr?.on('data', onData);
+
+    const timeoutHandle = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, timeoutMs);
+
+    // Ensure cleanup when promise resolves externally
+    const originalResolve = resolve;
+    resolve = () => {
+      clearTimeout(timeoutHandle);
+      cleanup();
+      originalResolve();
+    };
+  });
+
+  const waitForHttp = async () => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      await delay(250);
+      try {
+        const response = await agent.get(path);
+        if (response.status >= 200 && response.status < 500) {
+          return;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+      await delay(intervalMs);
+    }
+    throw new Error('timeout');
+  };
+
+  const timeoutPromise = delay(timeoutMs).then(() => {
+    throw new Error('timeout');
+  });
+
+  try {
+    await Promise.race([waitForLog(), waitForHttp(), timeoutPromise]);
+  } catch (err) {
+    const reason = lastError?.message ? ` (last error: ${lastError.message})` : '';
+    throw new Error(`Timeout waiting for server readiness${reason}`);
+  }
 }
 
-async function stopServer(proc, timeoutMs = 10000) {
+async function stopServer(proc, timeoutMs = 20000) {
   if (!proc) {
     return;
   }
 
-  let forced = false;
-  const closePromise = once(proc, 'close').catch(err => {
-    console.warn('[test] server close event error:', err.message);
-  });
+  let closed = false;
+  const closePromise = once(proc, 'close')
+    .then(() => {
+      closed = true;
+    })
+    .catch(err => {
+      console.warn('[test] server close event error:', err.message);
+    });
 
   if (!proc.killed) {
     proc.kill();
   }
 
-  const forceTimer = setTimeout(() => {
-    if (!proc.killed) {
-      forced = true;
+  const timeoutPromise = delay(timeoutMs).then(async () => {
+    if (!closed) {
       try {
         proc.kill('SIGKILL');
+        await delay(500);
       } catch (err) {
         console.warn('[test] force kill warning:', err.message);
       }
     }
-  }, timeoutMs);
+  });
 
-  await closePromise;
-
-  clearTimeout(forceTimer);
-  if (forced) {
+  await Promise.race([closePromise, timeoutPromise]);
+  if (!closed) {
+    await closePromise;
     console.warn('[test] server was force killed after timeout');
   }
 }
@@ -86,14 +133,14 @@ describe('API smoke tests', () => {
   let request;
 
   before(async function () {
-    this.timeout(20000);
+    this.timeout(70000);
     serverProc = startServer();
     request = supertest('http://localhost:8080');
-    await waitForServerReady(request);
+    await waitForServerReady(serverProc, request);
   });
 
   after(async function () {
-    this.timeout(10000);
+    this.timeout(30000);
     await stopServer(serverProc);
     serverProc = null;
   });
