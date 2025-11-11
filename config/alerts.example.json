@@ -1,0 +1,74 @@
+{
+  "comment": "Alert System Configuration - Copy to alerts.json and configure",
+  "email": {
+    "enabled": false,
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "secure": false,
+    "user": "your-email@gmail.com",
+    "pass": "your-app-password",
+    "from": "crypto-arbitrage@yourdomain.com",
+    "to": "alerts@yourdomain.com"
+  },
+  "telegram": {
+    "enabled": false,
+    "token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "chatId": "YOUR_TELEGRAM_CHAT_ID",
+    "instructions": {
+      "step1": "Create bot with @BotFather on Telegram",
+      "step2": "Get bot token from @BotFather",
+      "step3": "Start chat with your bot",
+      "step4": "Get chat ID from https://api.telegram.org/bot<TOKEN>/getUpdates"
+    }
+  },
+  "thresholds": {
+    "balanceDropPercent": 10,
+    "profitableSpreadPercent": 2,
+    "exchangeDowntimeMinutes": 15
+  },
+  "schedule": {
+    "dailySummaryEnabled": true,
+    "dailySummaryTime": "20:00"
+  },
+  "rules": {
+    "balance": {
+      "enabled": true,
+      "dropPercent": 10,
+      "gainPercent": 20,
+      "minBalance": 100,
+      "checkInterval": 300000
+    },
+    "opportunity": {
+      "enabled": true,
+      "minSpread": 2.0,
+      "minQualityScore": 70,
+      "consecutiveCount": 3,
+      "timeWindow": 300000
+    },
+    "exchange": {
+      "enabled": true,
+      "downMinutes": 15,
+      "degradedMinutes": 30,
+      "minSuccessRate": 0.8,
+      "maxLatency": 5000
+    },
+    "trading": {
+      "enabled": true,
+      "consecutiveLosses": 5,
+      "dailyLossPercent": 5,
+      "hourlyTradeLimit": 10
+    },
+    "performance": {
+      "enabled": true,
+      "minROI": -5,
+      "maxDrawdown": 15,
+      "minWinRate": 40
+    },
+    "system": {
+      "enabled": true,
+      "maxMemoryMB": 512,
+      "maxCpuPercent": 80,
+      "maxErrorRate": 0.1
+    }
+  }
+}
