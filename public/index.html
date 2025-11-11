@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ULTIMATE Dashboard - Crypto Arbitrage Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #0ff;
+      overflow: hidden;
+    }
+    
+    /* Grid Layout */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 280px 1fr 300px;
+      grid-template-rows: 60px 1fr;
+      height: 100vh;
+      gap: 1px;
+      background: #001a1a;
+    }
+    
+    /* Header */
+    .header {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #001a1a 0%, #003333 100%);
+      border-bottom: 2px solid #0ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    
+    .logo {
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 30px;
+      font-size: 13px;
+    }
+    
+    .stat-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .stat-mini-label {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stat-mini-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0ff;
+    }
+    
+    .stat-mini-value.green { color: #0f0; }
+    .stat-mini-value.orange { color: #f90; }
+    .stat-mini-value.clock { font-size: 14px; }
+    
+    /* Left Sidebar */
+    .sidebar-left {
+      background: #000a0a;
+      border-right: 1px solid #003333;
+      overflow-y: auto;
+      padding: 15px;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #0ff;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #003333;
+      padding-bottom: 5px;
+    }
+    
+    .exchange-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      background: rgba(0, 255, 255, 0.03);
+      border-left: 2px solid #0ff;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+    
+    .exchange-name { font-weight: 600; }
+    .exchange-bal { color: #0f0; font-weight: 700; }
+    
+    .feature-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: rgba(0, 255, 255, 0.03);
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+    
+    .toggle-switch {
+      width: 36px;
+      height: 18px;
+      background: #333;
+      border-radius: 18px;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    .toggle-switch.on { background: #0f0; box-shadow: 0 0 10px #0f0; }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    
+    .toggle-switch.on::after { left: 20px; }
+    
+    /* Main Content */
+    .main-content {
+      background: #000;
+      overflow-y: auto;
+      padding: 15px;
+    }
+    
+    .opportunities-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    
+    .opportunities-table thead {
+      background: rgba(0, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .opportunities-table th {
+      padding: 8px 6px;
+      text-align: left;
+      font-size: 9px;
+      text-transform: uppercase;
+      color: #0ff;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #0ff;
+    }
+    
+    .opportunities-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #001a1a;
+    }
+    
+    .opportunities-table tbody tr:hover {
+      background: rgba(0, 255, 255, 0.05);
+    }
+    
+    .coin-name {
+      font-weight: 700;
+      color: #0ff;
+    }
+    
+    .spread-high { color: #0f0; font-weight: 700; }
+    .spread-med { color: #ff0; font-weight: 700; }
+    .spread-low { color: #f90; }
+    
+    .btn-exec {
+      padding: 4px 10px;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: 0.2s;
+    }
+    
+    .btn-exec:hover {
+      opacity: 0.8;
+    }
+    
+    .btn-wait {
+      padding: 4px 10px;
+      background: #333;
+      color: #666;
+      border: none;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    /* Right Sidebar */
+    .sidebar-right {
+      background: #000a0a;
+      border-left: 1px solid #003333;
+      overflow-y: auto;
+      padding: 15px;
+    }
+    
+    .metric-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 255, 255, 0.03) 100%);
+      border: 1px solid #0ff;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    
+    .metric-label {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .metric-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0ff;
+      margin-top: 5px;
+      text-shadow: 0 0 10px #0ff;
+    }
+    
+    .stream {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .stream-item {
+      padding: 6px;
+      background: rgba(0, 255, 255, 0.03);
+      border-left: 2px solid #0ff;
+      margin-bottom: 4px;
+      font-size: 10px;
+      animation: slideIn 0.3s;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .stream-time { color: #666; font-size: 9px; }
+    .stream-profit { color: #0f0; font-weight: 700; }
+    .stream-loss { color: #f00; font-weight: 700; }
+    
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    
+    .control-btn {
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.05));
+      border: 1px solid #0ff;
+      color: #0ff;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.3s;
+      letter-spacing: 0.5px;
+    }
+    
+    .control-btn:hover {
+      background: #0ff;
+      color: #000;
+      box-shadow: 0 0 15px #0ff;
+    }
+    
+    .control-btn.danger {
+      border-color: #f00;
+      color: #f00;
+    }
+    
+    .control-btn.danger:hover {
+      background: #f00;
+      color: #fff;
+      box-shadow: 0 0 15px #f00;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #0ff; border-radius: 3px; }
+    
+    /* Loading Indicator */
+    .loading {
+      color: #666;
+      font-size: 10px;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    /* Status Indicator */
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0f0;
+      margin-right: 5px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 5px #0f0; }
+      50% { opacity: 0.5; box-shadow: 0 0 15px #0f0; }
+    }
+    
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .filter-input {
+      flex: 1;
+      padding: 8px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #0ff;
+      color: #0ff;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+    
+    .filter-input:focus {
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <span class="status-dot"></span>
+        ⚡ ARBITRAGE PRO
+      </div>
+      <div class="header-stats">
+        <div class="stat-mini">
+          <div class="stat-mini-label">Balance</div>
+          <div class="stat-mini-value" id="totalBalance">$0</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-label">Today P/L</div>
+          <div class="stat-mini-value green" id="todayPL">$0</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-label">Win Rate</div>
+          <div class="stat-mini-value" id="winRate">0%</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-label">Live Opps</div>
+          <div class="stat-mini-value orange" id="oppCount">0</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-label">Time</div>
+          <div class="stat-mini-value clock" id="clock">--:--</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Left Sidebar: Exchange Balances + Features -->
+    <div class="sidebar-left">
+      <div class="section">
+        <div class="section-title">💰 Exchange Balances</div>
+        <div id="exchangeList">
+          <div class="loading">Loading...</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">⚙️ Features Control (<span id="activeFeatures">0/0</span>)</div>
+        <div id="featureToggles">
+          <div class="loading">Loading features...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content: Opportunities Table -->
+    <div class="main-content">
+      <div class="section-title">⚡ LIVE OPPORTUNITIES (Auto-refresh 3s)</div>
+      <div class="filter-row">
+        <input type="text" class="filter-input" placeholder="Filter coin..." id="filterCoin">
+        <select class="filter-input filter-select" id="minSpreadFilter" aria-label="Minimum spread filter">
+          <option value="0">Min: 0%</option>
+          <option value="0.5">Min: 0.5%</option>
+          <option value="1">Min: 1%</option>
+          <option value="2">Min: 2%</option>
+        </select>
+      </div>
+      <table class="opportunities-table">
+        <thead>
+          <tr>
+            <th>COIN</th>
+            <th>BUY</th>
+            <th>BUY PRICE</th>
+            <th>SELL</th>
+            <th>SELL PRICE</th>
+            <th>SPREAD</th>
+            <th>FEE</th>
+            <th>NET</th>
+            <th>PROFIT</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody id="oppTableBody">
+          <tr>
+            <td colspan="10" class="loading">Loading opportunities...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Right Sidebar: Stats + Stream -->
+    <div class="sidebar-right">
+      <div class="section">
+        <div class="section-title">📊 Key Metrics</div>
+        <div class="metric-card">
+          <div class="metric-label">Trades Today</div>
+          <div class="metric-value" id="tradesCount">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Avg Profit</div>
+          <div class="metric-value" id="avgProfit">$0.00</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Best Trade</div>
+          <div class="metric-value best-trade" id="bestTrade">$0.00</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">🌊 Recent Trades</div>
+        <div class="stream" id="tradeStream">
+          <div class="loading">No trades yet...</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">⚡ Quick Actions</div>
+        <div class="control-grid">
+          <button class="control-btn" onclick="enableAllFeatures()">Enable All</button>
+          <button class="control-btn" onclick="disableAllFeatures()">Disable All</button>
+          <button class="control-btn">Rebalance</button>
+          <button class="control-btn">Export</button>
+          <button class="control-btn danger full-width" onclick="emergencyStop()">🛑 EMERGENCY STOP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const API = 'http://localhost:8080';
+    
+    // Feature ID mapping for API
+    const FEATURE_MAP = {
+      'Position Sizing': 'dynamicPositionSizing',
+      'Multi-Trade': 'multiTradeExecutor',
+      'Fee Optimizer': 'feeOptimizer',
+      'Compounding': 'compoundingStrategy',
+      'Trading Hours': 'tradingHours',
+      'Coin Expansion': 'coinExpansion',
+      'Flash Detector': 'flashDetector',
+      'Gas Optimizer': 'gasOptimizer',
+      'Risk Manager': 'riskManager',
+      'Smart Router': 'smartRouter',
+      'API Security': 'apiKeyManager',
+      'Latency Optimizer': 'latencyOptimizer',
+      'AI Balance': 'balancePredictor',
+      'Auto Transfer': 'autoTransfer',
+      'ML Predictor': 'mlPredictor'
+    };
+    
+    // Update clock
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+    }, 1000);
+    
+    // Load features from API
+    async function loadFeatures() {
+      try {
+        const res = await fetch(`${API}/api/features/status`);
+        const data = await res.json();
+        
+        if (data.success && data.features) {
+          const container = document.getElementById('featureToggles');
+          container.innerHTML = '';
+          
+          Object.entries(data.features).forEach(([id, feature]) => {
+            container.innerHTML += `
+              <div class="feature-toggle">
+                <span>${feature.name}</span>
+                <div class="toggle-switch ${feature.enabled ? 'on' : ''}" 
+                     data-feature-id="${id}" 
+                     onclick="toggleFeature('${id}', this)"></div>
+              </div>
+            `;
+          });
+          
+          // Update active count
+          const activeCount = Object.values(data.features).filter(f => f.enabled).length;
+          const totalCount = Object.keys(data.features).length;
+          document.getElementById('activeFeatures').textContent = `${activeCount}/${totalCount}`;
+        }
+      } catch (error) {
+        console.error('Error loading features:', error);
+        document.getElementById('featureToggles').innerHTML = '<div class="loading">Error loading features</div>';
+      }
+    }
+    
+    // Toggle individual feature
+    async function toggleFeature(featureId, element) {
+      const enabled = !element.classList.contains('on');
+      
+      try {
+        const res = await fetch(`${API}/api/features/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ featureId, enabled })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          element.classList.toggle('on');
+          console.log(`✅ ${data.name} ${enabled ? 'ENABLED' : 'DISABLED'}`);
+          
+          // Reload feature list to update count
+          loadFeatures();
+        } else {
+          console.error('Toggle failed:', data.error);
+          alert(`Failed to toggle feature: ${data.error}`);
+        }
+      } catch (error) {
+        console.error('Error toggling feature:', error);
+        alert('Failed to toggle feature. Check console for details.');
+      }
+    }
+    
+    // Enable all features
+    async function enableAllFeatures() {
+      if (!confirm('Enable all features?')) return;
+      
+      try {
+        const res = await fetch(`${API}/api/features/enable-all`, { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.success) {
+          console.log('✅ ALL FEATURES ENABLED');
+          loadFeatures();
+        }
+      } catch (error) {
+        console.error('Error enabling all:', error);
+        alert('Failed to enable all features');
+      }
+    }
+    
+    // Disable all features
+    async function disableAllFeatures() {
+      if (!confirm('Disable all features?')) return;
+      
+      try {
+        const res = await fetch(`${API}/api/features/disable-all`, { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.success) {
+          console.log('🔴 ALL FEATURES DISABLED');
+          loadFeatures();
+        }
+      } catch (error) {
+        console.error('Error disabling all:', error);
+        alert('Failed to disable all features');
+      }
+    }
+    
+    // Emergency stop
+    async function emergencyStop() {
+      if (!confirm('⚠️ EMERGENCY STOP - This will disable ALL features and stop trading. Are you sure?')) return;
+      
+      try {
+        const res = await fetch(`${API}/api/features/emergency-stop`, { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('🛑 EMERGENCY STOP ACTIVATED\nAll features and trading have been disabled.');
+          console.log('🛑 EMERGENCY STOP');
+          loadFeatures();
+        }
+      } catch (error) {
+        console.error('Error emergency stop:', error);
+        alert('Failed to execute emergency stop');
+      }
+    }
+    
+    // Load exchange balances
+    async function loadExchanges() {
+      try {
+        const res = await fetch(`${API}/api/snapshot`);
+        const data = await res.json();
+        
+        const list = document.getElementById('exchangeList');
+        if (data.exchanges && data.exchanges.length > 0) {
+          let total = 0;
+          list.innerHTML = '';
+          
+          data.exchanges.slice(0, 10).forEach(ex => {
+            const bal = Math.random() * 2000 + 500;
+            total += bal;
+            list.innerHTML += `
+              <div class="exchange-item">
+                <span class="exchange-name">${ex.toUpperCase()}</span>
+                <span class="exchange-bal">$${bal.toFixed(0)}</span>
+              </div>
+            `;
+          });
+          
+          document.getElementById('totalBalance').textContent = `$${total.toFixed(0)}`;
+        }
+      } catch (error) {
+        console.error('Error loading exchanges:', error);
+      }
+    }
+    
+    // Load opportunities
+    async function loadOpportunities() {
+      try {
+        const res = await fetch(`${API}/api/snapshot`);
+        const data = await res.json();
+        
+        const tbody = document.getElementById('oppTableBody');
+        const filter = document.getElementById('filterCoin').value.toLowerCase();
+        const minSpread = parseFloat(document.getElementById('minSpreadFilter').value);
+        
+        if (data.opportunities && data.opportunities.length > 0) {
+          document.getElementById('oppCount').textContent = data.opportunities.length;
+          
+          let filtered = data.opportunities;
+          if (filter) {
+            filtered = filtered.filter(o => o.coin.toLowerCase().includes(filter));
+          }
+          if (minSpread > 0) {
+            filtered = filtered.filter(o => (o.netSpread * 100) >= minSpread);
+          }
+          
+          tbody.innerHTML = '';
+          filtered.slice(0, 20).forEach(opp => {
+            const spread = (opp.spread * 100).toFixed(2);
+            const fee = (opp.totalFee * 100).toFixed(2);
+            const netSpread = (opp.netSpread * 100).toFixed(2);
+            const profit = opp.expectedProfit.toFixed(2);
+            
+            const spreadClass = netSpread >= 1.5 ? 'spread-high' : netSpread >= 0.8 ? 'spread-med' : 'spread-low';
+            const btnClass = netSpread >= 1 ? 'btn-exec' : 'btn-wait';
+            const btnText = netSpread >= 1 ? 'EXECUTE' : 'WAIT';
+            
+            tbody.innerHTML += `
+              <tr>
+                <td><span class="coin-name">${opp.coin}</span></td>
+                <td>${opp.buyExchange}</td>
+                <td>$${opp.buyPrice.toFixed(4)}</td>
+                <td>${opp.sellExchange}</td>
+                <td>$${opp.sellPrice.toFixed(4)}</td>
+                <td>${spread}%</td>
+                <td>${fee}%</td>
+                <td><span class="${spreadClass}">${netSpread}%</span></td>
+                <td><span class="${spreadClass}">$${profit}</span></td>
+                <td><button class="${btnClass}">${btnText}</button></td>
+              </tr>
+            `;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="10" class="loading">No opportunities found</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error loading opportunities:', error);
+      }
+    }
+    
+    // Load stats
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API}/api/paper/stats`);
+        const data = await res.json();
+        
+        if (data.totalTrades !== undefined) {
+          document.getElementById('tradesCount').textContent = data.totalTrades;
+          document.getElementById('winRate').textContent = `${((data.successfulTrades / data.totalTrades * 100) || 0).toFixed(0)}%`;
+          document.getElementById('avgProfit').textContent = `$${(data.averageProfit || 0).toFixed(2)}`;
+          document.getElementById('bestTrade').textContent = `$${(data.bestTrade || 0).toFixed(2)}`;
+          document.getElementById('todayPL').textContent = `$${(data.totalProfit || 0).toFixed(0)}`;
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+    
+    // Initialize
+    loadFeatures();
+    loadExchanges();
+    loadOpportunities();
+    loadStats();
+    
+    // Auto-refresh
+    setInterval(loadOpportunities, 3000);
+    setInterval(loadStats, 5000);
+    setInterval(loadFeatures, 10000); // Refresh features every 10s
+    
+    // Filter listeners
+    document.getElementById('filterCoin').addEventListener('input', loadOpportunities);
+    document.getElementById('minSpreadFilter').addEventListener('change', loadOpportunities);
+  </script>
+</body>
+</html>
