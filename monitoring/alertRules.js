@@ -394,3 +394,5 @@ export class AlertRulesEngine {
     return JSON.stringify(this.rules, null, 2);
   }
 }
+
+export default AlertRulesEngine;
