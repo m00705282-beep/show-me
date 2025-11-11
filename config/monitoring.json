@@ -1,0 +1,16 @@
+{
+  "coinTracking": {
+    "dataPath": "./data/coin-tracking.json",
+    "retryOptions": {
+      "retries": 3,
+      "delayMs": 1000
+    }
+  },
+  "coinRotation": {
+    "dataFile": "./data/coin-performance.json"
+  },
+  "schedules": {
+    "scanIntervalMs": 21600000,
+    "initialScanDelayMs": 10000
+  }
+}
