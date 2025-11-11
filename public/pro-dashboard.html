@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRO Dashboard - Crypto Arbitrage AI System</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: #1a1f35;
+      --border: #2d3748;
+      --text-primary: #f0f4f8;
+      --text-secondary: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --glow-blue: rgba(59, 130, 246, 0.3);
+      --glow-green: rgba(16, 185, 129, 0.3);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #111827 0%, #1a1f35 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-card);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--glow-green);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    
+    .metric {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    
+    .metric-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .feature-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .feature-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .feature-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .feature-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .stat-label { color: var(--text-secondary); }
+    .stat-value { font-weight: 600; color: var(--text-primary); }
+    
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 1rem;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .info-row:last-child { border-bottom: none; }
+    
+    .icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: 0.5rem;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-secondary);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+      transition: width 0.3s;
+    }
+    
+    .text-green { color: var(--accent-green); }
+    .text-red { color: var(--accent-red); }
+    .text-blue { color: var(--accent-blue); }
+    .text-orange { color: var(--accent-orange); }
+
+    .mt-6 { margin-top: 1.5rem; }
+    .status-subtle {
+      color: var(--text-secondary);
+      margin-left: 1rem;
+    }
+    .btn-refresh {
+      background: var(--accent-blue);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-refresh:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <h1>⚡ CRYPTO ARBITRAGE AI PRO</h1>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span>Live & Active</span>
+      <span class="status-subtle" id="lastUpdate">Updated: --</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Key Performance Indicators -->
+    <section class="grid grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💰 Total Balance</div>
+          <div class="badge badge-success">LIVE</div>
+        </div>
+        <div class="metric text-green" id="totalBalance">$0.00</div>
+        <div class="metric-label">Available Trading Capital</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📈 Today's Profit</div>
+          <div class="badge badge-info">24H</div>
+        </div>
+        <div class="metric text-blue" id="todayProfit">$0.00</div>
+        <div class="metric-label" id="todayROI">ROI: 0.00%</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎯 Active Features</div>
+          <div class="badge badge-success" id="featuresCount">15/15</div>
+        </div>
+        <div class="metric" id="activeFeatures">15</div>
+        <div class="metric-label">All Systems Operational</div>
+      </div>
+    </section>
+
+    <!-- Features Overview -->
+    <section class="card mt-6">
+      <div class="card-header">
+        <div class="card-title">🚀 15 OPTIMIZATION FEATURES - LIVE STATUS</div>
+        <button onclick="refreshFeatures()" class="btn-refresh">🔄 Refresh</button>
+      </div>
+      <div class="features-grid" id="featuresGrid">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="grid grid-2 mt-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Profit Trend (24H)</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="profitChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Features Performance</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="featuresChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Stats -->
+    <section class="grid grid-2 mt-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💎 Trading Statistics</div>
+        </div>
+        <div id="tradingStats">
+          <div class="info-row">
+            <span>Total Trades</span>
+            <span id="totalTrades">0</span>
+          </div>
+          <div class="info-row">
+            <span>Success Rate</span>
+            <span class="text-green" id="successRate">0%</span>
+          </div>
+          <div class="info-row">
+            <span>Average Profit</span>
+            <span class="text-blue" id="avgProfit">$0.00</span>
+          </div>
+          <div class="info-row">
+            <span>Best Trade</span>
+            <span class="text-green" id="bestTrade">$0.00</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🤖 AI/ML Features</div>
+        </div>
+        <div id="aiStats">
+          <div class="info-row">
+            <span>🧠 Balance Predictor</span>
+            <span class="badge badge-success" id="balancePredictorStatus">Active</span>
+          </div>
+          <div class="info-row">
+            <span>🔮 ML Price Predictor</span>
+            <span class="badge badge-success" id="mlPredictorStatus">Active</span>
+          </div>
+          <div class="info-row">
+            <span>🚀 Auto Transfer</span>
+            <span class="badge badge-warning" id="autoTransferStatus">DRY-RUN</span>
+          </div>
+          <div class="info-row">
+            <span>Predictions Accuracy</span>
+            <span class="text-blue" id="predictionAccuracy">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // API Configuration
+    const API_BASE = 'http://localhost:8080';
+    let profitChart, featuresChart;
+
+    // Feature definitions
+    const FEATURES = [
+      { id: 'tradingHours', name: 'Trading Hours Optimizer', icon: '⏰', endpoint: '/api/optimization/trading-hours' },
+      { id: 'coinExpansion', name: 'Coin Pair Expansion', icon: '💰', endpoint: '/api/optimization/coin-expansion' },
+      { id: 'flashDetector', name: 'Flash Arbitrage', icon: '⚡', endpoint: '/api/optimization/flash-detector' },
+      { id: 'gasOptimizer', name: 'Gas Fee Optimizer', icon: '⛽', endpoint: '/api/optimization/gas-optimizer' },
+      { id: 'riskManager', name: 'Risk Manager', icon: '🛡️', endpoint: '/api/optimization/risk-manager' },
+      { id: 'smartRouter', name: 'Smart Order Router', icon: '🎯', endpoint: '/api/optimization/smart-router' },
+      { id: 'latencyOptimizer', name: 'Latency Optimizer', icon: '🚀', endpoint: '/api/optimization/latency' },
+      { id: 'balancePredictor', name: 'AI Balance Predictor', icon: '🧠', endpoint: '/api/ai/balance-predictor' },
+      { id: 'autoTransfer', name: 'Auto Transfer', icon: '💸', endpoint: '/api/ai/auto-transfer' },
+      { id: 'mlPredictor', name: 'ML Price Predictor', icon: '🔮', endpoint: '/api/ai/ml-predictor' },
+      { id: 'dynamicSizing', name: 'Dynamic Position Sizing', icon: '📊', endpoint: '/api/optimization/position-sizing' },
+      { id: 'feeOptimizer', name: 'Fee Optimizer', icon: '💎', endpoint: '/api/optimization/fee-optimizer' },
+      { id: 'compounding', name: 'Profit Compounding', icon: '📈', endpoint: '/api/optimization/compounding' },
+      { id: 'multiTrade', name: 'Multi-Trade Executor', icon: '🔥', endpoint: '/api/optimization/multi-trade' },
+      { id: 'apiKeyManager', name: 'API Key Security', icon: '🔐', endpoint: '/api/optimization/api-key' }
+    ];
+
+    // Initialize charts
+    function initCharts() {
+      // Profit chart
+      const profitCtx = document.getElementById('profitChart').getContext('2d');
+      profitChart = new Chart(profitCtx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+          datasets: [{
+            label: 'Profit ($)',
+            data: Array(24).fill(0),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              ticks: { color: '#94a3b8' }
+            },
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+
+      // Features chart
+      const featuresCtx = document.getElementById('featuresChart').getContext('2d');
+      featuresChart = new Chart(featuresCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Active', 'Idle', 'Processing'],
+          datasets: [{
+            data: [15, 0, 0],
+            backgroundColor: ['#10b981', '#6b7280', '#3b82f6']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              max: 15,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              ticks: { color: '#94a3b8' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    // Fetch and display features
+    async function loadFeatures() {
+      try {
+        const response = await fetch(`${API_BASE}/api/optimization/all-stats`);
+        const data = await response.json();
+        
+        const grid = document.getElementById('featuresGrid');
+        grid.innerHTML = '';
+        
+        let activeCount = 0;
+        
+        FEATURES.forEach(feature => {
+          const stats = data[feature.id] || {};
+          const isActive = !stats.error;
+          if (isActive) activeCount++;
+          
+          const card = document.createElement('div');
+          card.className = 'feature-card';
+          card.innerHTML = `
+            <div class="feature-header">
+              <span class="feature-name">${feature.icon} ${feature.name}</span>
+              <span class="badge ${isActive ? 'badge-success' : 'badge-danger'}">${isActive ? 'ACTIVE' : 'ERROR'}</span>
+            </div>
+            <div class="feature-stats">
+              <div class="stat-item">
+                <span class="stat-label">Status</span>
+                <span class="stat-value">${isActive ? 'Running' : 'Error'}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Uptime</span>
+                <span class="stat-value">${isActive ? '100%' : '0%'}</span>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+        
+        document.getElementById('activeFeatures').textContent = activeCount;
+        document.getElementById('featuresCount').textContent = `${activeCount}/15`;
+        
+      } catch (error) {
+        console.error('Error loading features:', error);
+      }
+    }
+
+    // Fetch trading stats
+    async function loadTradingStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/snapshot`);
+        const data = await response.json();
+        
+        document.getElementById('totalBalance').textContent = `$${(data.totalBalance || 0).toFixed(2)}`;
+        document.getElementById('todayProfit').textContent = `$${(data.todayProfit || 0).toFixed(2)}`;
+        document.getElementById('todayROI').textContent = `ROI: ${(data.todayROI || 0).toFixed(2)}%`;
+        
+        // Update trading stats
+        document.getElementById('totalTrades').textContent = data.totalTrades || 0;
+        document.getElementById('successRate').textContent = `${(data.successRate || 0).toFixed(1)}%`;
+        document.getElementById('avgProfit').textContent = `$${(data.avgProfit || 0).toFixed(2)}`;
+        document.getElementById('bestTrade').textContent = `$${(data.bestTrade || 0).toFixed(2)}`;
+        
+        document.getElementById('lastUpdate').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    function refreshFeatures() {
+      loadFeatures();
+      loadTradingStats();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      loadFeatures();
+      loadTradingStats();
+      
+      // Auto-refresh every 5 seconds
+      setInterval(() => {
+        loadFeatures();
+        loadTradingStats();
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
