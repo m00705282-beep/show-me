@@ -1,0 +1,141 @@
+{
+  "comment": "Real Trading Configuration - LIVE MODE",
+  "warning": "⚠️ THIS USES REAL MONEY! Configured for LIVE trading with safety limits.",
+  "enabled": true,
+  "dryRun": false,
+  "safetyCaps": {
+    "maxTradeSize": 20,
+    "maxDailyVolume": 100,
+    "maxOpenPositions": 2,
+    "minSpreadRequired": 2,
+    "maxConsecutiveLosses": 2,
+    "maxDailyLoss": 50
+  },
+  "approval": {
+    "requireApproval": true,
+    "autoApproveUnder": 20
+  },
+  "exchanges": {
+    "binance": {
+      "enabled": true,
+      "apiKey": "EEEo3uLqNmfFqvhO8nEiK5LvlfC5pu5QrdLKBv5IgytIEhLaVMSuF461xhU0Bl74",
+      "secret": "mQKx6KsyJDBBWNaiKA8jX0lTsvnthWG34TCrsNS2mi3XvrjODypXdmifza0zW8eZ",
+      "instructions": {
+        "step1": "Create API key at https://www.binance.com/en/my/settings/api-management",
+        "step2": "Enable 'Spot & Margin Trading' permission ONLY",
+        "step3": "Restrict to your IP address for security",
+        "step4": "NEVER enable withdrawal permissions!",
+        "step5": "Save API Key and Secret securely"
+      }
+    },
+    "kraken": {
+      "enabled": true,
+      "apiKey": "hClDkG9KqJrb4XIXHG65OLGjbRsm/ALfNhLhE4CksfehWvABa3o9yRKg",
+      "secret": "zYVKYEC4owS6To1PxH/s6F6ZF57AvQssX9ORtaygM+BNu9YTdgw1/OUP/OIF+l75P6x/T7UX8DXI6FrZSAG+tA==",
+      "instructions": {
+        "step1": "Create API key at https://www.kraken.com/u/security/api",
+        "step2": "Enable 'Query Funds' and 'Create & Modify Orders' ONLY",
+        "step3": "Set withdrawal limit to 0",
+        "step4": "Enable 2FA for additional security",
+        "step5": "Never share your secret key"
+      }
+    },
+    "coinbase": {
+      "enabled": true,
+      "apiKey": "organizations/3f4a8c6b-be45-4c9e-a19f-012784bd1cd2/apiKeys/f1e20e2d-0313-45c5-91c7-fdadae326b75",
+      "secret": "-----BEGIN EC PRIVATE KEY-----\\nMHcCAQEEIBVL26JiZa4nK27AOM5ahq5O8YOXZr0e5knbsyG6n+uyoAoGCCqGSM49\\nAwEHoUQDQgAEXscgFUE8KMxY876n3zhmuIqLiaWvchYiWtKyJLwwJpS307hJpojm\\nd2euzngyHBs7Oqd67WcqqZWezGxZ3WN3Ng==\\n-----END EC PRIVATE KEY-----\\n",
+      "instructions": {
+        "step1": "Create API key at https://www.coinbase.com/settings/api",
+        "step2": "Enable 'Trade' permission ONLY",
+        "step3": "Do NOT enable 'Transfer' or 'Withdraw' permissions",
+        "step4": "Restrict to your IP if possible",
+        "step5": "Save your secret key securely - you'll only see it once"
+      }
+    },
+    "kucoin": {
+      "enabled": true,
+      "passphrase": "Jeronimo81@2",
+      "secret": "2ec25eaa-f915-4fb8-9939-eb8d21570ee2",
+      "instructions": {
+        "step3": "Set Trading Password (passphrase)",
+        "step1": "Create API key at https://www.kucoin.com/account/api",
+        "step2": "Enable 'Trade' permission ONLY",
+        "step5": "Save API Key, Secret, and Passphrase securely",
+        "step4": "Restrict to your IP address"
+      },
+      "apiKey": "690c62b827d4ba00012a2060"
+    },
+    "okx": {
+      "enabled": true,
+      "secret": "9D8BA7DE1DC4389BF7D4ED2040F27641",
+      "apiKey": "ff467f3c-20a5-4338-a80b-81a5810f4815",
+      "password": "Jeronimo81@2"
+    },
+    "gateio": {
+      "enabled": true,
+      "secret": "7fb78f3fcaa690cb97ddac927569f5a38e587601a64a3ab1dec67d037d1650f2",
+      "apiKey": "046403122e999802f6800ff5cf193198"
+    },
+    "bitfinex": {
+      "enabled": true,
+      "secret": "e296ba2d4b6f2be7e080fb91677ad73b9caf3a20e15",
+      "apiKey": "28383ad98dbcb2f66dd0af3de86a5bee745f607d290"
+    },
+    "bitget": {
+      "enabled": true,
+      "secret": "c253d4002005a892a97fb4cf2d3e3f7449f8855df9fb9d0872b51ce265d2d1ac",
+      "apiKey": "bg_3d246ae518e5fe7f76bb8f6d5aee4d3b",
+      "password": "26061981"
+    },
+    "ascendex": {
+      "enabled": true,
+      "secret": "ymJ4qhai8ESgoJXdXGkvtSXrZivCQg2eZHJYkDDopNJv8aLQjBjwTpWdzNfA4DmL",
+      "apiKey": "yz1oIIRgzC13iWDDAI1RpIoA6cYQRi7d"
+    },
+    "poloniex": {
+      "enabled": true,
+      "secret": "8986e06c70e7baffc88741a25455878d750570fb1b948c2f8b8c0d10c9f70e459c57cfa18ef8fd310972ba5566072ca7aa8c3b529cbd7766721392d20b54419c",
+      "apiKey": "FIQ7HDM0-NGT8S0P8-TZA0QTYJ-976K37EB"
+    },
+    "mexc": {
+      "enabled": true,
+      "apiKey": "mx0vglrCdDGeLVD3ut",
+      "secret": "5db05ee519824db1a2f1428ea7728078"
+    },
+    "bitstamp": {
+      "apiKey": "dvaMyec68aBKJku73oICy0g3GShUmPg",
+      "enabled": true,
+      "secret": "GgeTdTyfVYu84YZoZ4sWOULGD99egSsN"
+    },
+    "bybit": {
+      "apiKey": "2mPYJ90dzWpzhaWBnu",
+      "enabled": true,
+      "secret": "kxGw8oLuA30cP4u1jHhPltxGhIc9qvzoF86U"
+    },
+    "bitrue": {
+      "enabled": true,
+      "apiKey": "8dfce3804a6dd47518a2ce96e4029e5a5fe1df8142c3bd234f918ed3e4d33317",
+      "secret": "ENTER_SECRET_HERE",
+      "description": "Bitrue - Added automatically"
+    }
+  },
+  "notifications": {
+    "onTrade": true,
+    "onApprovalRequired": true,
+    "onEmergencyStop": true,
+    "onDailyLimitReached": true
+  },
+  "testing": {
+    "testMode": {
+      "description": "Currently in DRY-RUN mode - safe testing without real money",
+      "steps": [
+        "1. Test with dryRun: true first (current setting)",
+        "2. Add your API keys for at least 2 exchanges",
+        "3. Enable the exchanges (set enabled: true)",
+        "4. Test with small amounts (-20)",
+        "5. When ready, set dryRun: false for LIVE trading"
+      ],
+      "recommendation": "Start with maxTradeSize: -20 for initial live testing"
+    }
+  }
+}
