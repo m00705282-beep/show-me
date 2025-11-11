@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRYPTO ARBITRAGE - CYBER CONTROL</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Orbitron', monospace;
+      background: #000;
+      color: #0ff;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    /* Animated background */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 0;
+      animation: gridMove 20s linear infinite;
+    }
+    
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    /* Header */
+    .cyber-header {
+      background: linear-gradient(135deg, rgba(0,20,40,0.9), rgba(20,0,40,0.9));
+      border: 2px solid #0ff;
+      border-radius: 0;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 30px rgba(0,255,255,0.3), inset 0 0 30px rgba(0,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cyber-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,255,0.3), transparent);
+      animation: scan 3s linear infinite;
+    }
+    
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .cyber-title {
+      font-size: 2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+      background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff; }
+      50% { text-shadow: 0 0 30px #f0f, 0 0 60px #f0f; }
+    }
+    
+    /* Circular Gauge */
+    .gauge-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+    }
+    
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(0,255,255,0.1);
+      stroke-width: 15;
+    }
+    
+    .gauge-progress {
+      fill: none;
+      stroke: url(#gradient1);
+      stroke-width: 15;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.5s ease;
+      filter: drop-shadow(0 0 10px #0ff);
+    }
+    
+    .gauge-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    .gauge-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #0ff;
+      text-shadow: 0 0 20px #0ff;
+      line-height: 1;
+    }
+    
+    .gauge-label {
+      font-size: 0.75rem;
+      color: #0ff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+    }
+    
+    /* Cards */
+    .cyber-card {
+      background: linear-gradient(135deg, rgba(0,20,40,0.7), rgba(20,0,40,0.7));
+      border: 2px solid #0ff;
+      border-radius: 0;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    }
+    
+    .cyber-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #0ff, #f0f, #0ff);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .cyber-card:hover::before {
+      opacity: 0.3;
+    }
+    
+    .card-header {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #0ff;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0,255,255,0.3);
+      text-shadow: 0 0 10px #0ff;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    
+    /* Stats */
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0ff;
+      text-shadow: 0 0 20px #0ff;
+      margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(0,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    /* Exchange List */
+    .exchange-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: rgba(0,255,255,0.05);
+      border-left: 3px solid #0ff;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .exchange-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: rgba(0,255,255,0.2);
+      transition: width 0.3s;
+    }
+    
+    .exchange-item:hover::before {
+      width: 100%;
+    }
+    
+    .exchange-name {
+      font-weight: 700;
+      color: #0ff;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .exchange-balance {
+      font-family: monospace;
+      font-weight: 900;
+      color: #f0f;
+      text-shadow: 0 0 10px #f0f;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(0,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0ff, #f0f);
+      box-shadow: 0 0 10px #0ff;
+      transition: width 0.3s;
+      position: relative;
+    }
+    
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Toggle Switch */
+    .cyber-toggle {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: rgba(0,255,255,0.1);
+      border: 2px solid #0ff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .cyber-toggle.active {
+      background: rgba(255,0,255,0.3);
+      border-color: #f0f;
+      box-shadow: 0 0 20px #f0f;
+    }
+    
+    .cyber-toggle::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #0ff;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s;
+      box-shadow: 0 0 10px #0ff;
+    }
+    
+    .cyber-toggle.active::before {
+      left: 32px;
+      background: #f0f;
+      box-shadow: 0 0 10px #f0f;
+    }
+    
+    /* Feature Row */
+    .feature-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      background: rgba(0,255,255,0.03);
+      border: 1px solid rgba(0,255,255,0.2);
+      position: relative;
+    }
+    
+    .feature-row::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, #0ff, #f0f);
+    }
+    
+    .feature-name {
+      font-weight: 700;
+      color: #0ff;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+      filter: drop-shadow(0 0 5px #0ff);
+    }
+    
+    /* Buttons */
+    .cyber-btn {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid #0ff;
+      color: #0ff;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .cyber-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,255,255,0.3);
+      transition: left 0.3s;
+    }
+    
+    .cyber-btn:hover {
+      box-shadow: 0 0 20px #0ff;
+      text-shadow: 0 0 10px #0ff;
+    }
+    
+    .cyber-btn:hover::before {
+      left: 0;
+    }
+    
+    /* Opportunity Table */
+    .opp-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .opp-table th {
+      background: rgba(0,255,255,0.1);
+      padding: 0.75rem;
+      text-align: left;
+      border: 1px solid rgba(0,255,255,0.3);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #0ff;
+    }
+    
+    .opp-table td {
+      padding: 0.75rem;
+      border: 1px solid rgba(0,255,255,0.1);
+      font-family: monospace;
+    }
+    
+    .opp-table tr:hover {
+      background: rgba(0,255,255,0.05);
+    }
+    
+    /* Scrollbar */
+    .scroll-area {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .scroll-area::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    .scroll-area::-webkit-scrollbar-track {
+      background: rgba(0,255,255,0.1);
+    }
+    
+    .scroll-area::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #0ff, #f0f);
+      box-shadow: 0 0 10px #0ff;
+    }
+    
+    /* Glitch effect */
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+    
+    .glitch {
+      animation: glitch 0.3s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <header class="cyber-header">
+      <h1 class="cyber-title">⚡ CRYPTO ARBITRAGE SYSTEM ⚡</h1>
+    </header>
+
+    <!-- Main Gauges -->
+    <section class="grid grid-3">
+      <div class="cyber-card">
+        <div class="card-header">💰 TOTAL CAPITAL</div>
+        <div class="gauge-container">
+          <svg width="200" height="200">
+            <defs>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0ff" stop-opacity="1" />
+                <stop offset="100%" stop-color="#f0f" stop-opacity="1" />
+              </linearGradient>
+            </defs>
+            <circle class="gauge-bg" cx="100" cy="100" r="85" />
+            <circle class="gauge-progress" id="balanceGauge" cx="100" cy="100" r="85" 
+                    stroke-dasharray="534" stroke-dashoffset="534" />
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-value" id="totalBalance">$0</div>
+            <div class="gauge-label">USD</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cyber-card">
+        <div class="card-header">📈 TODAY PROFIT</div>
+        <div class="gauge-container">
+          <svg width="200" height="200">
+            <circle class="gauge-bg" cx="100" cy="100" r="85" />
+            <circle class="gauge-progress" id="profitGauge" cx="100" cy="100" r="85" 
+                    stroke-dasharray="534" stroke-dashoffset="400" />
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-value" id="todayProfit">$0</div>
+            <div class="gauge-label">ROI: <span id="roi">0%</span></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cyber-card">
+        <div class="card-header">🎯 OPPORTUNITIES</div>
+        <div class="gauge-container">
+          <svg width="200" height="200">
+            <circle class="gauge-bg" cx="100" cy="100" r="85" />
+            <circle class="gauge-progress" id="oppGauge" cx="100" cy="100" r="85" 
+                    stroke-dasharray="534" stroke-dashoffset="300" />
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-value" id="oppCount">0</div>
+            <div class="gauge-label">ACTIVE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Exchange Balances & Stats -->
+    <section class="grid grid-2 mt-15">
+      <div class="cyber-card">
+        <div class="card-header">🏦 EXCHANGE BALANCES</div>
+        <div class="scroll-area" id="exchangeList">
+          <div class="exchange-item">
+            <span class="exchange-name">LOADING...</span>
+            <span class="exchange-balance">$0.00</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cyber-card">
+        <div class="card-header">📊 SYSTEM STATUS</div>
+        <div class="card-padding">
+          <div class="mb-15">
+            <div class="stat-label">Active Features</div>
+            <div class="stat-value" id="activeFeatures">15/15</div>
+            <div class="progress-bar">
+              <div class="progress-fill progress-fill-full"></div>
+            </div>
+          </div>
+          <div class="mb-15">
+            <div class="stat-label">Trading Mode</div>
+            <div class="stat-value stat-value-warning">DRY-RUN</div>
+          </div>
+          <div>
+            <div class="stat-label">Uptime</div>
+            <div class="stat-value" id="uptime">--:--:--</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature Controls -->
+    <section class="cyber-card mt-15">
+      <div class="card-header">⚙️ FEATURE CONTROLS</div>
+      <div class="grid grid-2" id="featureControls">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- Live Opportunities -->
+    <section class="cyber-card mt-15">
+      <div class="card-header">🚀 LIVE ARBITRAGE OPPORTUNITIES</div>
+      <div class="scroll-area">
+        <table class="opp-table">
+          <thead>
+            <tr>
+              <th>COIN</th>
+              <th>BUY</th>
+              <th>SELL</th>
+              <th>SPREAD</th>
+              <th>PROFIT</th>
+            </tr>
+          </thead>
+          <tbody id="oppTableBody">
+            <tr>
+              <td colspan="5" class="table-placeholder">Loading opportunities...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8080';
+    const FEATURES = [
+      { id: 'pos', name: 'Position Sizing', icon: '📊' },
+      { id: 'multi', name: 'Multi-Trade', icon: '🔥' },
+      { id: 'fee', name: 'Fee Optimizer', icon: '💎' },
+      { id: 'compound', name: 'Compounding', icon: '📈' },
+      { id: 'hours', name: 'Trading Hours', icon: '⏰' },
+      { id: 'expansion', name: 'Coin Expansion', icon: '💰' },
+      { id: 'flash', name: 'Flash Arbitrage', icon: '⚡' },
+      { id: 'gas', name: 'Gas Optimizer', icon: '⛽' },
+      { id: 'risk', name: 'Risk Manager', icon: '🛡️' },
+      { id: 'router', name: 'Smart Router', icon: '🎯' },
+      { id: 'api', name: 'API Security', icon: '🔐' },
+      { id: 'latency', name: 'Latency', icon: '🚀' },
+      { id: 'ai', name: 'AI Balance', icon: '🧠' },
+      { id: 'transfer', name: 'Auto Transfer', icon: '💸' },
+      { id: 'ml', name: 'ML Predictor', icon: '🔮' }
+    ];
+
+    function updateGauge(id, value, max) {
+      const circumference = 534;
+      const percent = (value / max) * circumference;
+      const offset = circumference - percent;
+      document.getElementById(id).style.strokeDashoffset = offset;
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(`${API}/api/snapshot`);
+        const data = await res.json();
+        
+        // Update balances
+        if (data.exchanges) {
+          let total = 0;
+          const list = document.getElementById('exchangeList');
+          list.innerHTML = '';
+          
+          data.exchanges.slice(0, 10).forEach(ex => {
+            const bal = Math.random() * 1000 + 100; // Mock data
+            total += bal;
+            list.innerHTML += `
+              <div class="exchange-item">
+                <span class="exchange-name">${ex.toUpperCase()}</span>
+                <span class="exchange-balance">$${bal.toFixed(2)}</span>
+              </div>
+            `;
+          });
+          
+          document.getElementById('totalBalance').textContent = `$${total.toFixed(0)}`;
+          updateGauge('balanceGauge', total, 10000);
+        }
+        
+        // Update opportunities
+        if (data.opportunities) {
+          const tbody = document.getElementById('oppTableBody');
+          tbody.innerHTML = '';
+          document.getElementById('oppCount').textContent = data.opportunities.length;
+          updateGauge('oppGauge', data.opportunities.length, 50);
+          
+          data.opportunities.slice(0, 10).forEach(opp => {
+            const spread = (opp.netSpread * 100).toFixed(2);
+            const profit = opp.expectedProfit.toFixed(2);
+            tbody.innerHTML += `
+              <tr>
+                <td style="color: #0ff; font-weight: 700;">${opp.coin}</td>
+                <td>${opp.buyExchange}</td>
+                <td>${opp.sellExchange}</td>
+                <td style="color: #f0f;">${spread}%</td>
+                <td style="color: #0f0;">$${profit}</td>
+              </tr>
+            `;
+          });
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    function renderFeatures() {
+      const container = document.getElementById('featureControls');
+      container.innerHTML = '';
+      
+      FEATURES.forEach((f, i) => {
+        const active = Math.random() > 0.2;
+        container.innerHTML += `
+          <div class="feature-row">
+            <div class="feature-row-info">
+              <span class="feature-icon">${f.icon}</span>
+              <span class="feature-name">${f.name}</span>
+            </div>
+            <div class="cyber-toggle ${active ? 'active' : ''}" onclick="toggleFeature(this)"></div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleFeature(el) {
+      el.classList.toggle('active');
+    }
+
+    // Initialize
+    renderFeatures();
+    loadData();
+    setInterval(loadData, 5000);
+    
+    // Update time
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('uptime').textContent = now.toLocaleTimeString();
+    }, 1000);
+  </script>
+</body>
+</html>
