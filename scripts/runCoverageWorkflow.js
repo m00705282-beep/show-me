@@ -59,8 +59,8 @@ if (!GITHUB_OWNER || !GITHUB_REPO) {
   try {
     await ensureWorkflowCommitted();
     await ensureProjectAssetsCommitted();
-    const refSha = await getLatestCommitSha();
-    const run = await dispatchWorkflow(refSha);
+    const { ref } = await getLatestRefInfo();
+    const run = await dispatchWorkflow(ref);
     await waitForRunCompletion(run.id);
     await downloadArtifacts(run.id);
     console.log(`[coverage-runner] Completed coverage sync for run #${run.run_number} (id: ${run.id}).`);
@@ -111,7 +111,7 @@ async function ensureTestsCommitted() {
 async function dispatchWorkflow(refValue) {
   const workflowId = encodeURIComponent('test-and-coverage.yml');
   const dispatchResponse = await githubFetch('POST', `/actions/workflows/${workflowId}/dispatches`, {
-    ref: refValue || GITHUB_BRANCH
+    ref: refValue || `refs/heads/${GITHUB_BRANCH}`
   });
 
   if (dispatchResponse.status !== 204) {
@@ -200,7 +200,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function getLatestCommitSha() {
+async function getLatestRefInfo() {
   const response = await githubFetch('GET', `/git/ref/heads/${encodeURIComponent(GITHUB_BRANCH)}`);
   if (!response.ok) {
     const text = await response.text();
@@ -212,7 +212,7 @@ async function getLatestCommitSha() {
     throw new Error('Branch head SHA unavailable.');
   }
   console.log(`[coverage-runner] Using commit ${sha.slice(0, 7)} for workflow dispatch.`);
-  return sha;
+  return { ref: data?.ref || `refs/heads/${GITHUB_BRANCH}`, sha };
 }
 
 async function ensureRepoFile(relativePath, commitMessage) {
